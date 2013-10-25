@@ -28,6 +28,14 @@
                 </ScrollViewer>
             </phone:PivotItem>
 
+            <phone:PivotItem Header="godzinowa">
+                <ScrollViewer>
+                    <StackPanel x:Name="hStackPanel">
+
+                    </StackPanel>
+                </ScrollViewer>
+            </phone:PivotItem>
+            
             <!--Pivot item two-->
             <phone:PivotItem Header="ubranie">
                 <Grid/>

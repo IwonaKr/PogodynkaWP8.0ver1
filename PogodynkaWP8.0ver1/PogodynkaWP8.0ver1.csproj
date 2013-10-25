@@ -95,12 +95,16 @@
     </Compile>
     <Compile Include="Date.cs" />
     <Compile Include="ForecastDay.cs" />
+    <Compile Include="HourlyForecast.cs" />
+    <Compile Include="HourlyUC.xaml.cs">
+      <DependentUpon>HourlyUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LocalizedStrings.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="pogoda.xaml.cs">
-      <DependentUpon>pogoda.xaml</DependentUpon>
+    <Compile Include="Pogoda.xaml.cs">
+      <DependentUpon>Pogoda.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\AppResources.Designer.cs">
@@ -114,11 +118,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="HourlyUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="pogoda.xaml">
+    <Page Include="Pogoda.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

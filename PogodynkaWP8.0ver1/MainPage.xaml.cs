@@ -45,7 +45,7 @@ namespace PogodynkaWP8._0ver1
             ListBoxItem selectedItem = this.listBox.ItemContainerGenerator.ContainerFromItem(data) as ListBoxItem;
 
             // MessageBox.Show(data.Miasto);
-            NavigationService.Navigate(new Uri("/pogoda.xaml?msg="+data.Miasto, UriKind.RelativeOrAbsolute));
+            NavigationService.Navigate(new Uri("/Pogoda.xaml?msg="+data.Miasto, UriKind.RelativeOrAbsolute));
         }
         
     }
