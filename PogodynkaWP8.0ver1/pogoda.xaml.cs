@@ -19,7 +19,9 @@ namespace PogodynkaWP8._0ver1
 {
     public partial class pogoda : PhoneApplicationPage
     {
-        public static string miasto;
+        public string miasto;
+        public static string mess; //potrzebne do linka
+        public bool czyToGPS;
         string place = "";
         string obs_time = "";
         string weather1 = "";
@@ -36,6 +38,7 @@ namespace PogodynkaWP8._0ver1
         public static List<ForecastDay> dni2= new List<ForecastDay>(); //txt_forecast
         public static List<ForecastDay> SFDay = new List<ForecastDay>(); //SimpleForecast
         public static List<HourlyForecast> HourlyForecast = new List<HourlyForecast>();
+        public static Astronomy astronomy;
 
         public pogoda()
         {
@@ -48,7 +51,26 @@ namespace PogodynkaWP8._0ver1
             string msg;
             if (NavigationContext.QueryString.TryGetValue("msg", out msg))
             {
-                miasto=msg;
+
+                if (msg.Contains(","))
+                {
+                    mess=msg;
+                    var cos = mess.Split(',');
+                    if (cos.Length==4)
+                    {
+                        mess=cos[0]+"."+cos[1]+","+cos[2]+"."+cos[3];
+                    }
+                    this.miasto="GPS: "+msg;
+                    Debug.WriteLine("GPS");
+                    czyToGPS=true;
+                }
+                else
+                {
+                    this.miasto=msg;
+                    mess="Poland/"+msg;
+                    Debug.WriteLine("MIASTO");
+                    czyToGPS=false;
+                }
                 this.miastoTB.Text=miasto;
                 Thread t = new Thread(NewThread);
                 t.Start();
@@ -56,7 +78,7 @@ namespace PogodynkaWP8._0ver1
         }
         void NewThread()
         {
-            string url = "http://api.wunderground.com/api/c9d15b10ff3ed303/forecast/forecast10day/hourly/conditions/astronomy/lang:PL/q/Poland/"+miasto+".xml";
+            string url = "http://api.wunderground.com/api/c9d15b10ff3ed303/forecast/forecast10day/hourly/conditions/astronomy/lang:PL/q/"+mess+".xml";
 
             WebClient wc = new WebClient();
             //wc.DownloadStringCompleted += HttpsCompleted;
@@ -76,6 +98,66 @@ namespace PogodynkaWP8._0ver1
                 XmlReader reader = XmlReader.Create(new StringReader(weather));
                 XDocument doc = XDocument.Load(reader);
                 obrabianieConditions(doc);
+
+                /* 
+                 * ASTRONOMIA 
+                 */
+                astronomy = new Astronomy();
+                int hTmp=0, mTmp=0, ho=0, m=0;
+
+                var moon_phase = (from d in doc.Descendants()
+                                  where (d.Name.LocalName=="moon_phase")
+                                  select d).FirstOrDefault();
+                astronomy.ageOfMoon=moon_phase.Element("ageOfMoon").Value;
+                astronomy.percentIlluminated=moon_phase.Element("percentIlluminated").Value;
+                var tmp = (from d in moon_phase.Descendants()
+                           where (d.Name.LocalName=="sunset")
+                           select d).FirstOrDefault();
+                if ((int.TryParse(tmp.Element("hour").Value, out hTmp))&&(int.TryParse(tmp.Element("minute").Value, out mTmp)))
+                {
+                    ho=hTmp;
+                    m=mTmp;
+                    DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, ho, m, 0);
+                    astronomy.moonset=cos;
+                }
+                tmp = (from d in moon_phase.Descendants()
+                       where (d.Name.LocalName=="sunrise")
+                       select d).FirstOrDefault();
+                if ((int.TryParse(tmp.Element("hour").Value, out hTmp))&&(int.TryParse(tmp.Element("minute").Value, out mTmp)))
+                {
+                    ho=hTmp;
+                    m=mTmp;
+                    DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, ho, m, 0);
+                    astronomy.moonrise=cos;
+                }
+                moon_phase = (from d in doc.Descendants()
+                              where (d.Name.LocalName=="sun_phase")
+                              select d).FirstOrDefault();
+                tmp = (from d in moon_phase.Descendants()
+                       where (d.Name.LocalName=="sunrise")
+                       select d).FirstOrDefault();
+                if ((int.TryParse(tmp.Element("hour").Value, out hTmp))&&(int.TryParse(tmp.Element("minute").Value, out mTmp)))
+                {
+                    ho=hTmp;
+                    m=mTmp;
+                    DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, ho, m, 0);
+                    astronomy.sunrise=cos;
+                }
+                tmp = (from d in moon_phase.Descendants()
+                       where (d.Name.LocalName=="sunset")
+                       select d).FirstOrDefault();
+                if ((int.TryParse(tmp.Element("hour").Value, out hTmp))&&(int.TryParse(tmp.Element("minute").Value, out mTmp)))
+                {
+                    ho=hTmp;
+                    m=mTmp;
+                    DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, ho, m, 0);
+                    astronomy.sunset=cos;
+                }
+
+                Debug.WriteLine("Moonrise: "+astronomy.moonrise.ToShortTimeString()+",Moonset: "+astronomy.moonset.ToShortTimeString());
+                Debug.WriteLine("Sunrise: "+astronomy.sunrise.ToShortTimeString()+", Sunset: "+astronomy.sunset.ToShortTimeString());
+
+                //KONIEC ASTRONOMY
 
                 var hourly_forecast = (from d in doc.Descendants()
                                        where (d.Name.LocalName=="hourly_forecast")
@@ -174,7 +256,7 @@ namespace PogodynkaWP8._0ver1
                         b.opady.Text="Opady: "+hf.qpf;
                         b.temperatura.Text="Temp: "+hf.tempC+"C";
                         ImageSource imgSrc;
-                        if (hf.czas.Hour<6 || hf.czas.Hour>22)
+                        if (hf.czas.Hour<=astronomy.sunrise.Hour || hf.czas.Hour>=astronomy.sunset.Hour)
                         {
                             imgSrc = new BitmapImage(new Uri("Icons/nt_"+hf.icon+".png", UriKind.Relative));
                         }
@@ -202,6 +284,28 @@ namespace PogodynkaWP8._0ver1
 
         private void obrabianieConditions(XDocument doc)
         {
+
+            if (czyToGPS)
+            {
+                var current_obs = (from d in doc.Descendants()
+                                   where (d.Name.LocalName=="current_observation")
+                                   select d).FirstOrDefault();
+                Debug.WriteLine(current_obs.ToString());
+                var disLoc = (from d in current_obs.Descendants()
+                              where (d.Name.LocalName=="display_location")
+                              select d).FirstOrDefault();
+                //var place = (from d in disLoc.Descendants()
+                //             where (d.Name.LocalName=="full")
+                //             select d).FirstOrDefault();
+                Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    this.miasto=disLoc.Element("full").Value;
+                    this.miastoTB.Text=disLoc.Element("full").Value;
+                    Debug.WriteLine(disLoc.ToString());
+                });
+
+
+            }
             var txt_forecast = (from d in doc.Descendants()
                                 where (d.Name.LocalName == "txt_forecast")
                                 select d).ToList();
