@@ -173,7 +173,16 @@ namespace PogodynkaWP8._0ver1
                         b.Warunki=hf.condition;
                         b.opady.Text="Opady: "+hf.qpf;
                         b.temperatura.Text="Temp: "+hf.tempC+"C";
-                        ImageSource imgSrc = new BitmapImage(new Uri("Icons/"+hf.icon+".png", UriKind.Relative));
+                        ImageSource imgSrc;
+                        if (hf.czas.Hour<6 || hf.czas.Hour>22)
+                        {
+                            imgSrc = new BitmapImage(new Uri("Icons/nt_"+hf.icon+".png", UriKind.Relative));
+                        }
+                        else
+                        {
+                            imgSrc = new BitmapImage(new Uri("Icons/"+hf.icon+".png", UriKind.Relative));
+                        }
+
                         b.ikonka.Source=imgSrc;
                         hStackPanel.Children.Add(b);
                     });
