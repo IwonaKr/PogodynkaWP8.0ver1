@@ -35,17 +35,23 @@
                     </StackPanel>
                 </ScrollViewer>
             </phone:PivotItem>
-            
+
+            <phone:PivotItem Header="następne dni">
+                <ScrollViewer>
+                    <StackPanel x:Name="ndStackPanel"/>
+                </ScrollViewer>
+            </phone:PivotItem>
+
             <!--Pivot item two-->
             <phone:PivotItem Header="ubranie">
                 <Grid/>
             </phone:PivotItem>
-            
+
             <!-- Pivot item three-->
             <phone:PivotItem Header="sport">
                 <Grid/>
             </phone:PivotItem>
         </phone:Pivot>
     </Grid>
-    
+
 </phone:PhoneApplicationPage>

@@ -13,7 +13,6 @@ using System.Windows.Navigation;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
 
 namespace PogodynkaWP8._0ver1
 {
@@ -178,7 +177,7 @@ namespace PogodynkaWP8._0ver1
                     if (int.TryParse(FCTTIME.Element("hour").Value, out iTmp))
                         h=iTmp;
                     if (int.TryParse(FCTTIME.Element("min").Value, out iTmp))
-                        s=iTmp;
+                        min=iTmp;
                     if (int.TryParse(FCTTIME.Element("year").Value, out iTmp))
                         y=iTmp;
                     if (int.TryParse(FCTTIME.Element("mon").Value, out iTmp))
@@ -313,21 +312,6 @@ namespace PogodynkaWP8._0ver1
             var forecast = (from d in txt_forecast.Descendants()
                             where (d.Name.LocalName=="forecastday")
                             select d).ToList();
-
-            foreach (var item in forecast)
-            {
-
-                Console.WriteLine(item);
-                ForecastDay d = new ForecastDay();
-                d.period = item.Element("period").Value;
-                d.icon=item.Element("icon").Value;
-                d.iconUrl=item.Element("icon_url").Value;
-                d.fcttext=item.Element("fcttext").Value;
-                d.fcttextMetric=item.Element("fcttext_metric").Value;
-                d.title=item.Element("title").Value;
-                d.pop=item.Element("pop").Value;
-                dni2.Add(d);
-            }
             var simpleForecast = (from d in doc.Descendants()
                                   where (d.Name.LocalName=="simpleforecast")
                                   select d).ToList();
@@ -335,6 +319,9 @@ namespace PogodynkaWP8._0ver1
             var smplFrcstDay = (from d in simpleForecast.Descendants()
                                 where (d.Name.LocalName=="forecastday")
                                 select d).ToList();
+            int simplePeriod =1;
+
+
             foreach (var item in smplFrcstDay)
             {
                 string sTmp="";
@@ -368,6 +355,21 @@ namespace PogodynkaWP8._0ver1
                 d.prettyShort=data.Element("pretty_short").Value;
 
                 fd.data=d;
+                int h=0, min=0, s=0, y=0, mon=0, mday=0;
+                if (int.TryParse(d.hour, out iTmp))
+                    h=iTmp;
+                if (int.TryParse(d.min, out iTmp))
+                    min=iTmp;
+                if (int.TryParse(d.year, out iTmp))
+                    y=iTmp;
+                if (int.TryParse(d.month, out iTmp))
+                    mon=iTmp;
+                if (int.TryParse(d.day, out iTmp))
+                    mday=iTmp;
+
+                DateTime dt = new DateTime(y, mon, mday, h, min, s);
+                fd.data2=dt;
+
 
 
                 //WIND NIE DZIAŁA, DOKOŃCZYĆ
@@ -431,6 +433,137 @@ namespace PogodynkaWP8._0ver1
                 SFDay.Add(fd);
             }
 
+            foreach (var item in forecast)
+            {
+                Console.WriteLine(item);
+                ForecastDay d = new ForecastDay();
+                d.period = item.Element("period").Value;
+                d.icon=item.Element("icon").Value;
+                d.iconUrl=item.Element("icon_url").Value;
+                d.fcttext=item.Element("fcttext").Value;
+                d.fcttextMetric=item.Element("fcttext_metric").Value;
+                d.title=item.Element("title").Value;
+                d.pop=item.Element("pop").Value;
+                int p=0;
+                if (int.TryParse(d.period, out p))
+                {
+
+                    if (p%2==0)
+                    {
+                        ForecastDay demo = SFDay.Find(df => df.period.Equals(simplePeriod.ToString()));
+                        d.avehumidity=demo.avehumidity;
+                        d.avewind_degrees=demo.avewind_degrees;
+                        d.avewind_dir=demo.avewind_dir;
+                        d.avewind_kph=demo.avewind_kph;
+                        d.avewind_mph=demo.avewind_mph;
+                        d.conditions=demo.conditions;
+                        d.data2=demo.data2;
+                        d.highTempC=demo.highTempC;
+                        d.lowTempC=demo.lowTempC;
+                        d.maxhumidity=demo.maxhumidity;
+                        d.maxwind_degrees=demo.maxwind_degrees;
+                        d.maxwind_dir=demo.maxwind_dir;
+                        d.maxwind_kph=demo.maxwind_kph;
+                        d.maxwind_mph=demo.maxwind_mph;
+                        d.minhumidity=demo.minhumidity;
+                        d.qpfAllDay=demo.qpfAllDay;
+                        d.skyicon=demo.skyicon;
+
+                        simplePeriod++;
+                        Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("pl-PL");
+                            System.Threading.Thread.CurrentThread.CurrentCulture = ci;
+                            DaysUC b = new DaysUC();
+                            ImageSource imgSrc;
+                            b.Tytul=d.title;
+                            b.Wilgotnosc=d.avehumidity.ToString()+"%";
+                            b.Warunki=d.conditions;
+                            b.Dzien=d.data2.ToString("d MMM yyyy");
+                            if (d.snowAllDay!=null && d.qpfAllDay!=null)
+                                b.IloscOpadow=d.qpfAllDay.ToString()+"mm(D),"+d.snowAllDay.ToString()+"mm(Ś)";
+                            else if (d.snowAllDay!=null && d.qpfAllDay==null)
+                                b.IloscOpadow="0mm(D),"+d.snowAllDay.ToString()+"(Ś)";
+                            else if (d.snowAllDay==null && d.qpfAllDay!=null)
+                                b.IloscOpadow=d.qpfAllDay.ToString()+"mm(D),0mm(Ś)";
+                            else if (d.snowAllDay==null&&d.qpfAllDay==null)
+                                b.IloscOpadow="0 mm";
+                            b.PrawdOpadow=d.pop+"%";
+                            b.TempMin=d.lowTempC.ToString()+"C";
+                            b.TempMax=d.highTempC.ToString()+"C";
+                            b.Wiatr=d.avewind_kph.ToString()+"km/h";
+
+                            imgSrc = new BitmapImage(new Uri("Icons/"+d.icon+".png", UriKind.Relative));
+
+
+                            b.Ikona=imgSrc;
+                            ndStackPanel.Children.Add(b);
+                        });
+
+
+                    }
+                    else
+                    {
+                        Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("pl-PL");
+                            System.Threading.Thread.CurrentThread.CurrentCulture = ci;
+                            DaysUC b = new DaysUC();
+                            ImageSource imgSrc;
+                            b.Tytul=d.title;
+                            var strings = d.fcttextMetric.Split('.', ':');
+                            int i=strings.Length;
+                            switch (i)
+                            {
+                                case 6:
+                                    b.Warunki=strings[0];
+                                    b.TempMin=strings[3];
+                                    b.TempMax=strings[3];
+                                    b.Wiatr=strings[5];
+                                    b.PrawdOpadow="";
+                                    b.IloscOpadow="";
+                                    break;
+                                case 9:
+                                    b.Warunki=strings[0];
+                                    b.TempMax=strings[3];
+                                    b.TempMin=strings[3];
+                                    b.Wiatr=strings[5];
+                                    b.PrawdOpadow="";
+                                    b.IloscOpadow="";
+                                    b.Wilgotnosc=strings[7];
+                                    break;
+                                case 11:
+                                    b.Warunki=strings[0];
+                                    b.TempMax=strings[3];
+                                    b.TempMin=strings[3];
+                                    b.Wiatr=strings[5];
+                                    b.PrawdOpadow=(strings[9].Split(' ')).Last();
+                                    b.IloscOpadow="";
+                                    b.Wilgotnosc=strings[7];
+                                    break;
+                                default:
+                                    b.Warunki=strings[0];
+                                    b.TempMax=strings[3];
+                                    b.Wiatr=strings[5];
+                                    b.PrawdOpadow="";
+                                    b.IloscOpadow="";
+                                    b.Wilgotnosc="";
+                                    break;
+                            }
+                            b.Dzien="";
+
+                            imgSrc = new BitmapImage(new Uri("Icons/"+d.icon+".png", UriKind.Relative));
+
+
+                            b.Ikona=imgSrc;
+                            ndStackPanel.Children.Add(b);
+                        });
+                    }
+
+                }
+                dni2.Add(d);
+
+            }
             var dzien = (from d in SFDay where d.period=="1" select d).FirstOrDefault();
             var dzien2 = (from d in dni2 where d.period=="0" select d).FirstOrDefault();
             if (!(dzien==null))

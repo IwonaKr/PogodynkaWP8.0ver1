@@ -15,6 +15,7 @@ namespace PogodynkaWP8._0ver1
         public string fcttextMetric { get; set; }
         public string pop { get; set; } //Probability of Precipitation -> prawdopodobieństwo opadów atmosferycznych
         public Date data { get; set; }
+        public DateTime data2 { get; set; }
 
         //dla forecast z SIMPLE FORECAST
         public string highTempC { get; set; } //a może zamienic na int?

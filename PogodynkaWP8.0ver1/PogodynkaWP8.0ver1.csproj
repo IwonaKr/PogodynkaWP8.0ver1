@@ -95,6 +95,9 @@
     </Compile>
     <Compile Include="Astronomy.cs" />
     <Compile Include="Date.cs" />
+    <Compile Include="DaysUC.xaml.cs">
+      <DependentUpon>DaysUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ForecastDay.cs" />
     <Compile Include="HourlyForecast.cs" />
     <Compile Include="HourlyUC.xaml.cs">
@@ -119,6 +122,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="DaysUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="HourlyUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
