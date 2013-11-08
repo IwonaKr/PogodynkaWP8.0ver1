@@ -11,6 +11,7 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using PogodynkaWP8._0ver1.Resources;
 using Windows.Devices.Geolocation;
+using Windows.System;
 
 namespace PogodynkaWP8._0ver1
 {
@@ -89,6 +90,9 @@ namespace PogodynkaWP8._0ver1
                 {
                     // the application does not have the right capability or the location master switch is off
                     //statusTextBlock.Text = "location  is disabled in phone settings.";
+                    MessageBoxResult result = MessageBox.Show("Usługa lokalizacji jest wyłączona. ", "GPS wyłączony", MessageBoxButton.OKCancel);
+                    if (result==MessageBoxResult.OK)
+                        Launcher.LaunchUriAsync(new Uri("ms-settings-location:"));
                     haveLocation=false;
                 }
             }
