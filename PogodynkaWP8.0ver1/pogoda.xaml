@@ -51,7 +51,22 @@
             <!-- Pivot item three-->
             <phone:PivotItem Header="sport">
                 <ScrollViewer>
-                    <StackPanel x:Name="sportySP"/>
+                    <!--<StackPanel x:Name="sportySP"/>-->
+                    <!--<phone:LongListSelector x:Name="sportySP" FontSize="{StaticResource PhoneFontSizeLarge}">
+                        <phone:LongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"/>
+                            </DataTemplate>
+                        </phone:LongListSelector.ItemTemplate>
+                    </phone:LongListSelector>-->
+                    <ListBox x:Name="sportyLB"  FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
                 </ScrollViewer>
             </phone:PivotItem>
         </phone:Pivot>

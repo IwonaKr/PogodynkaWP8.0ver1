@@ -117,12 +117,16 @@ namespace PogodynkaWP8._0ver1
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
 
-                    LongListSelector listView1 = new LongListSelector();
-                    listView1.ItemsSource = listArray;
-                    listView1.SelectionChanged +=listView1_SelectionChanged;
-                    sportySP.Children.Add(listView1);
+                    //LongListSelector listView1 = new LongListSelector();
+                    //LongListSelector listView1 = sportySP;
+                    //listView1.ItemsSource = listArray;
+
+                    //listView1.SelectionChanged +=listView1_SelectionChanged;
+                    this.sportyLB.ItemsSource=listArray;
+                    this.sportyLB.SelectionChanged+=sportyLB_SelectionChanged;
+                    //sportySP.Children.Add(listView1);
                 });
-                
+
 
             }
             catch (Exception ex)
@@ -136,10 +140,14 @@ namespace PogodynkaWP8._0ver1
             }
         }
 
-        void listView1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void sportyLB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //throw new NotImplementedException();
+            // throw new NotImplementedException();
+            var nazwaSportu = (sender as ListBox).SelectedItem as String;
+           
+            Debug.WriteLine("Działa to to?                 "+ nazwaSportu);
         }
+
 
         private static void obrabianieAstronomy(XDocument doc)
         {
