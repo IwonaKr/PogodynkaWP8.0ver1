@@ -21,8 +21,9 @@
             <phone:PivotItem Header="pogoda">
                 <ScrollViewer x:Name="scrollViewer">
                     <StackPanel x:Name="glownyStackPanel">
-                        <TextBlock x:Name="miastoTB" Text="{Binding miasto}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="12,12,12,12"   FontSize="{StaticResource PhoneFontSizeExtraLarge}"/>
-                        <TextBlock x:Name="textBox1" Text="       Proszę czekać, pobieram dane pogodowe" Margin="{StaticResource PhoneMargin}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeNormal}" TextWrapping="Wrap" />
+                        <TextBlock x:Name="miastoTB" Text="{Binding miasto}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="12,12,12,12"   FontSize="{StaticResource PhoneFontSizeExtraLarge}" />
+                        <TextBlock x:Name="oDniu" Text="" Margin="{StaticResource PhoneMargin}" FontSize="{StaticResource PhoneFontSizeMedium}" TextWrapping="Wrap" Visibility="Collapsed"/>
+                        <TextBlock x:Name="textBox1" Text="       Proszę czekać, pobieram dane pogodowe" Margin="{StaticResource PhoneMargin}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeNormal}" TextWrapping="Wrap" />                        
                         <Image x:Name="ikonka" Source="/Icons/wait.png" Margin="{StaticResource PhoneMargin}" />
                     </StackPanel>
                 </ScrollViewer>

@@ -602,15 +602,15 @@ namespace PogodynkaWP8._0ver1
                     //        "\nfcttextMetric:     " + dzien2.fcttextMetric+
                     //        "\ntitle:           " + dzien2.title;
                     
-                    TextBlock tb = new TextBlock();
-                    tb.TextWrapping=TextWrapping.Wrap; //zawijanie tekstu
-                    tb.Text = "Temp: "+dzien.lowTempC+"C-"+dzien.highTempC+"C\nWarunki: "+dzien.conditions+"\nWilgotność (min,max,śr): "+dzien.minhumidity+",  "+dzien.maxhumidity.ToString()+","+dzien.avehumidity.ToString()+"\nWiatr (mile/h, km/h,kierunek): "+dzien.maxwind_mph.ToString()+","+dzien.maxwind_kph.ToString()+","+dzien.maxwind_dir;
-                    TextBlock oDniu = new TextBlock();
+                    //TextBlock tb = new TextBlock();
+                    //tb.TextWrapping=TextWrapping.Wrap; //zawijanie tekstu
+                    //tb.Text = "Temp: "+dzien.lowTempC+"C-"+dzien.highTempC+"C\nWarunki: "+dzien.conditions+"\nWilgotność (min,max,śr): "+dzien.minhumidity+",  "+dzien.maxhumidity.ToString()+","+dzien.avehumidity.ToString()+"\nWiatr (mile/h, km/h,kierunek): "+dzien.maxwind_mph.ToString()+","+dzien.maxwind_kph.ToString()+","+dzien.maxwind_dir;
+                    TextBlock oDniu = this.oDniu;
                     oDniu.TextWrapping=TextWrapping.Wrap;
                     oDniu.Text="Dzisiaj jest "+dzien.data.day+" "+dzien.data.monthName+" "+dzien.data.year+", "+dzien.data.weekDay+". To "+dzien.data.yday+" dzień roku.";
-
-                    this.glownyStackPanel.Children.Add(oDniu);
-                    this.glownyStackPanel.Children.Add(tb);
+                    oDniu.Visibility=Visibility.Visible;
+                    //this.glownyStackPanel.Children.Add(oDniu);
+                    //this.glownyStackPanel.Children.Add(tb);
                 });
             }
         }
