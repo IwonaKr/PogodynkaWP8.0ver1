@@ -297,20 +297,38 @@ namespace PogodynkaWP8._0ver1
                                    where (d.Name.LocalName=="current_observation")
                                    select d).FirstOrDefault();
                 Debug.WriteLine(current_obs.ToString());
+                
                 var disLoc = (from d in current_obs.Descendants()
                               where (d.Name.LocalName=="display_location")
                               select d).FirstOrDefault();
                 //var place = (from d in disLoc.Descendants()
                 //             where (d.Name.LocalName=="full")
                 //             select d).FirstOrDefault();
+                /*Pobieranie aktualnych danych */
+                ForecastDay curObs = new ForecastDay();
+                curObs.conditions=current_obs.Element("weather").Value;
+                curObs.highTempC=current_obs.Element("temp_c").Value; //taka zwykła temperatura
+                curObs.lowTempC=current_obs.Element("feelslike_c").Value; //odczuwalna
+                curObs.icon=current_obs.Element("icon").Value;
+
+
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
                     this.miasto=disLoc.Element("full").Value;
                     this.miastoTB.Text=disLoc.Element("full").Value;
                     Debug.WriteLine(disLoc.ToString());
 
+                    this.textBox1.Text=curObs.conditions+"\nTemperatura: "+curObs.highTempC+"C     Odczuwalna: "+curObs.lowTempC+"C\n"+
+                        "Wiatr: "+current_obs.Element("wind_kph").Value+"km/h   Odczuwalny: "+current_obs.Element("wind_gust_kph").Value+"km/h   "+current_obs.Element("wind_dir").Value+"\n"+
+                        "Wilgotność: "+current_obs.Element("relative_humidity").Value+
+                        "\nCiśnienie: "+current_obs.Element("pressure_mb").Value+"hPa, "+current_obs.Element("pressure_trend").Value+
+                        "\nWidoczność: "+current_obs.Element("visibility_km").Value+"km"+
+                        "\nOpady (godz/dzień): "+current_obs.Element("precip_1hr_metric").Value+"mm/"+current_obs.Element("precip_today_metric").Value+"mm";
                     //TO DO
                     //TUtaj dodać to podstawowe info o aktualnychh warunkach pogodowych
+                    Uri uri = new Uri("Icons/"+curObs.icon+".png", UriKind.Relative);
+                    ImageSource imgSource = new BitmapImage(uri);
+                    this.ikonka.Source = imgSource;
                 });
 
 
@@ -575,7 +593,7 @@ namespace PogodynkaWP8._0ver1
             {
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    this.textBox1.Text=dzien.conditions;
+                    //this.textBox1.Text=dzien.conditions;
                     Debug.WriteLine("dzien"+dzien.ToString());
 
                     //this.textBox1.Text = "Period:             " + dzien.period+
@@ -583,9 +601,7 @@ namespace PogodynkaWP8._0ver1
                     //        "\nPogoda:          " + dzien2.fcttext+
                     //        "\nfcttextMetric:     " + dzien2.fcttextMetric+
                     //        "\ntitle:           " + dzien2.title;
-                    Uri uri = new Uri("Icons/"+dzien.icon+".png", UriKind.Relative);
-                    ImageSource imgSource = new BitmapImage(uri);
-                    this.ikonka.Source = imgSource;
+                    
                     TextBlock tb = new TextBlock();
                     tb.TextWrapping=TextWrapping.Wrap; //zawijanie tekstu
                     tb.Text = "Temp: "+dzien.lowTempC+"C-"+dzien.highTempC+"C\nWarunki: "+dzien.conditions+"\nWilgotność (min,max,śr): "+dzien.minhumidity+",  "+dzien.maxhumidity.ToString()+","+dzien.avehumidity.ToString()+"\nWiatr (mile/h, km/h,kierunek): "+dzien.maxwind_mph.ToString()+","+dzien.maxwind_kph.ToString()+","+dzien.maxwind_dir;
