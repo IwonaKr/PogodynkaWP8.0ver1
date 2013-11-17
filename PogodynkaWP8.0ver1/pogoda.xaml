@@ -1,5 +1,5 @@
 ﻿<phone:PhoneApplicationPage
-    x:Class="PogodynkaWP8._0ver1.pogoda"
+    x:Class="PogodynkaWP8._0ver1.Pogoda"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
@@ -50,7 +50,9 @@
 
             <!-- Pivot item three-->
             <phone:PivotItem Header="sport">
-                <Grid/>
+                <ScrollViewer>
+                    <StackPanel x:Name="sportySP"/>
+                </ScrollViewer>
             </phone:PivotItem>
         </phone:Pivot>
     </Grid>

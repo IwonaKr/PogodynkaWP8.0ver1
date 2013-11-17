@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,30 +17,40 @@ using Microsoft.Phone.Controls;
 
 namespace PogodynkaWP8._0ver1
 {
-    public partial class pogoda : PhoneApplicationPage
+    public partial class Pogoda : PhoneApplicationPage
     {
         public string miasto;
         public static string mess; //potrzebne do linka
         public bool czyToGPS;
-        string place = "";
-        string obs_time = "";
-        string weather1 = "";
-        string temperature_string = "";
-        string relative_humidity = "";
-        string wind_string = "";
-        string pressure_mb = "";
-        string dewpoint_string = "";
-        string visibility_km = "";
-        string latitude = "";
-        string longitude = "";
-        string icon="";
+        //Może wykorzystam to przy currentObs
+        //string place = "";
+        //string obs_time = "";
+        //string weather1 = "";
+        //string temperature_string = "";
+        //string relative_humidity = "";
+        //string wind_string = "";
+        //string pressure_mb = "";
+        //string dewpoint_string = "";
+        //string visibility_km = "";
+        //string latitude = "";
+        //string longitude = "";
+        //string icon="";
         //public static List<ForecastDay> dni1= new List<ForecastDay>();
         public static List<ForecastDay> dni2= new List<ForecastDay>(); //txt_forecast
         public static List<ForecastDay> SFDay = new List<ForecastDay>(); //SimpleForecast
         public static List<HourlyForecast> HourlyForecast = new List<HourlyForecast>();
+        public static ObservableCollection<String> listArray = new ObservableCollection<string>();
         public static Astronomy astronomy;
 
-        public pogoda()
+        //do sportów
+        public string pog;
+        public string wiatr;
+        public int godzina;
+        public int miesiac;
+        public string dzienTygodnia;
+        public string temperatura;
+
+        public Pogoda()
         {
             InitializeComponent();
         }
@@ -102,6 +113,17 @@ namespace PogodynkaWP8._0ver1
 
                 obrabianieHourlyForecast(doc);
 
+                wyborSportow();
+                Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+
+                    LongListSelector listView1 = new LongListSelector();
+                    listView1.ItemsSource = listArray;
+                    listView1.SelectionChanged +=listView1_SelectionChanged;
+                    sportySP.Children.Add(listView1);
+                });
+                
+
             }
             catch (Exception ex)
             {
@@ -112,6 +134,11 @@ namespace PogodynkaWP8._0ver1
                     this.ikonka.Source=null;
                 });
             }
+        }
+
+        void listView1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
         }
 
         private static void obrabianieAstronomy(XDocument doc)
@@ -176,6 +203,9 @@ namespace PogodynkaWP8._0ver1
 
         private void obrabianieHourlyForecast(XDocument doc)
         {
+            System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("pl-PL");
+            System.Threading.Thread.CurrentThread.CurrentCulture = ci;
+
             var hourly_forecast = (from d in doc.Descendants()
                                    where (d.Name.LocalName=="hourly_forecast")
                                    select d).ToList();
@@ -184,6 +214,7 @@ namespace PogodynkaWP8._0ver1
             var hourly = (from d in hourly_forecast.Descendants()
                           where (d.Name.LocalName=="forecast")
                           select d).ToList();
+            int i=0;
             foreach (var item in hourly)
             {
                 int iTmp=0;
@@ -205,6 +236,7 @@ namespace PogodynkaWP8._0ver1
 
                 DateTime dt = new DateTime(y, mon, mday, h, min, s);
                 hf.czas=dt;
+
                 hf.monAbbrev = FCTTIME.Element("mon_abbrev").Value;
                 hf.monthAbbrev=FCTTIME.Element("month_name_abbrev").Value;
                 hf.pretty=FCTTIME.Element("pretty").Value;
@@ -261,11 +293,20 @@ namespace PogodynkaWP8._0ver1
                 hf.pressure=(((from d in item.Descendants()
                                where d.Name.LocalName=="mslp"
                                select d).FirstOrDefault()).Element("metric").Value);
+                if (i==0)
+                {
+                    dzienTygodnia=dt.DayOfWeek.ToString();
+                    miesiac=dt.Month;
+                    godzina=dt.Hour;
+                    temperatura=hf.tempC;
+                    wiatr=hf.windKph;
+                    i++;
+                }
                 HourlyForecast.Add(hf);
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("pl-PL");
-                    System.Threading.Thread.CurrentThread.CurrentCulture = ci;
+                    //System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("pl-PL");
+                    //System.Threading.Thread.CurrentThread.CurrentCulture = ci;
                     HourlyUC b = new HourlyUC();
                     b.Godz=hf.czas.ToString("HH:mm");
                     b.Dzien=hf.czas.ToString("d MMM yyyy");
@@ -297,7 +338,7 @@ namespace PogodynkaWP8._0ver1
                                    where (d.Name.LocalName=="current_observation")
                                    select d).FirstOrDefault();
                 Debug.WriteLine(current_obs.ToString());
-                
+
                 var disLoc = (from d in current_obs.Descendants()
                               where (d.Name.LocalName=="display_location")
                               select d).FirstOrDefault();
@@ -307,6 +348,7 @@ namespace PogodynkaWP8._0ver1
                 /*Pobieranie aktualnych danych */
                 ForecastDay curObs = new ForecastDay();
                 curObs.conditions=current_obs.Element("weather").Value;
+                pog=curObs.conditions; //do sportów potrzebne
                 curObs.highTempC=current_obs.Element("temp_c").Value; //taka zwykła temperatura
                 curObs.lowTempC=current_obs.Element("feelslike_c").Value; //odczuwalna
                 curObs.icon=current_obs.Element("icon").Value;
@@ -601,7 +643,7 @@ namespace PogodynkaWP8._0ver1
                     //        "\nPogoda:          " + dzien2.fcttext+
                     //        "\nfcttextMetric:     " + dzien2.fcttextMetric+
                     //        "\ntitle:           " + dzien2.title;
-                    
+
                     //TextBlock tb = new TextBlock();
                     //tb.TextWrapping=TextWrapping.Wrap; //zawijanie tekstu
                     //tb.Text = "Temp: "+dzien.lowTempC+"C-"+dzien.highTempC+"C\nWarunki: "+dzien.conditions+"\nWilgotność (min,max,śr): "+dzien.minhumidity+",  "+dzien.maxhumidity.ToString()+","+dzien.avehumidity.ToString()+"\nWiatr (mile/h, km/h,kierunek): "+dzien.maxwind_mph.ToString()+","+dzien.maxwind_kph.ToString()+","+dzien.maxwind_dir;
@@ -614,6 +656,787 @@ namespace PogodynkaWP8._0ver1
                 });
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // OD ANI SPORTY
+        public void wyborSportow()
+        {
+            //String pog="";
+
+
+            char poraDnia = getPoraDnia();
+            String pogoda2 = pog.ToLower();
+            if (pogoda2.Equals("pogodnie"))
+            {
+                ladnaPogoda(poraDnia);
+            }
+            else if (pogoda2.Equals("przewaga chmur"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("obłoki zanikające"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("śnieg"))
+                deszczowaPogoda(poraDnia);
+            else if (pogoda2.Equals("niewielkie zachmurzenie"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("deszcz"))
+                deszczowaPogoda(poraDnia);
+            else if (pogoda2.Equals("lekki deszcz"))
+                deszczowaPogoda(poraDnia);
+            else if (pogoda2.Equals("pochmurno"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("płatki mgły"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("lekkie przelotne deszcze"))
+                deszczowaPogoda(poraDnia);
+            else if (pogoda2.Equals("lekka mżawka"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("zamglenia"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("mżawka"))
+                deszczowaPogoda(poraDnia);
+            else if (pogoda2.Equals("mgła"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("lekka mgła"))
+                ladnaPogoda(poraDnia);
+            else if (pogoda2.Equals("częściowe zamglenia"))
+                ladnaPogoda(poraDnia);
+            else
+                listArray.Add("Nieznany rodzaj pogody");
+
+        }
+
+        public char getPoraDnia()
+        {
+            //String godz="";
+            //int godzina = 0;
+            //if (int.TryParse(godz, out godzina)) ;
+            char pora;
+
+            if ((godzina >= 6) && (godzina < 10))
+                pora = 'r'; // ranek
+            else if ((godzina >= 10) && (godzina < 14))
+                pora = 'p'; // "poludnie";
+            else if ((godzina >= 14) && (godzina < 18))
+                pora = 'o'; // "popołudnie";
+            else if ((godzina >= 18) && (godzina < 22))
+                pora = 'w'; // "wieczór";
+            else if ((godzina >= 22) && (godzina < 1))
+                pora = 'n'; // "noc";
+            else
+                pora = 'g'; // "głęboka noc";
+
+            return pora;
+        }
+
+        public void ladnaPogoda(char poraDnia)
+        {
+
+            int temp=0;
+            if (int.TryParse(temperatura, out temp))
+                Debug.WriteLine(temp);
+            char poraRoku = getPoraRoku();
+
+            switch (poraRoku)
+            {
+                case 'w':
+                    {
+                        // wiosna
+                        switch (poraDnia)
+                        {
+                            case 'r':
+                                {
+
+                                    // jest ladna pogoda, wiosna, ranek, dowolny dzień tygodnia (bo
+                                    // do 10 i tak wszystko zamknięte)
+
+                                    if ((temp >= -5) && (temp <= 25))
+                                    {
+                                        bieganie();
+                                        standardowe();
+                                    }
+                                    break;
+                                }
+
+                            case 'p':
+                            case 'o':
+                            case 'w':
+                                {
+                                    if ((dzienTygodnia.Equals("Monday"))
+                        || (dzienTygodnia.Equals("Tuesday"))
+                        || (dzienTygodnia.Equals("Wednesday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Friday"))
+                        || (dzienTygodnia.Equals("Saturday")))
+                                    {
+
+                                        // jest ladna pogoda, wiosna, południe+dzien+popoludnie+wieczór, na
+                                        // tygodniu + sobota
+
+                                        if ((temp>=-10)&&(temp<0))
+                                        {
+                                            naHali();
+                                        }
+                                        else if ((temp >= 0) && (temp < 35))
+                                        {
+                                            bieganie();
+                                            standardowe();
+                                            naHali();
+                                            naDworze();
+
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        // jest ladna pogoda, wiosna, południe+dzien+popoludnie+wieczór,
+                                        // niedziela
+                                        if ((temp >= 5) && (temp <= 35))
+                                        {
+                                            bieganie();
+                                            standardowe();
+                                            listArray.Add("Jazda konna");
+                                        }
+
+
+                                    }
+                                    break;
+                                }
+
+                            case 'n':
+                            case 'g':
+                                {
+                                    // jest ladna pogoda, wiosna, noc+głęboka noc, dowolny dzien
+                                    if ((temp >= -5) && (temp <= 30))
+                                    {
+                                        bieganie();
+                                        standardowe();
+                                    }
+                                    break;
+                                }
+                            default:
+                                {
+                                    Debug.WriteLine("Błąd", "Nie ma poryDnia");
+                                    break;
+                                }
+
+                        }
+
+                        break;
+                    }
+                case 'l':
+                    {// lato
+
+                        switch (poraDnia)
+                        {
+                            case 'r':
+                                {
+
+                                    // jest ladna pogoda, lato, ranek, dowolny dzień tygodnia (bo do
+                                    // 10 i tak wszystko zamknięte)
+
+                                    if ((temp >= 5) && (temp <= 30))
+                                    {
+                                        bieganie();
+                                        standardowe();
+                                    }
+
+                                    break;
+                                }
+
+                            case 'p':
+                            case 'o':
+                            case 'w':
+                                {
+                                    if ((dzienTygodnia.Equals("Monday"))
+                        || (dzienTygodnia.Equals("Tuesday"))
+                        || (dzienTygodnia.Equals("Wednesday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Friday"))
+                        || (dzienTygodnia.Equals("Saturday")))
+                                    {
+
+                                        // jest ladna pogoda, lato, południe+dzien+popoludnie+wieczór, na
+                                        // tygodniu + sobota
+
+                                        if ((temp>=-5)&&(temp<5))
+                                        {
+                                            naHali();
+                                        }
+                                        else if ((temp >= 5) && (temp <= 35))
+                                        {
+                                            bieganie();
+                                            standardowe();
+                                            naHali();
+                                            naDworze();
+
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        // jest ladna pogoda, lato, południe+dzien+popoludnie+wieczór,
+                                        // niedziela
+                                        if ((temp >= 5) && (temp <= 35))
+                                        {
+                                            bieganie();
+                                            standardowe();
+                                            listArray.Add("Jazda konna");
+                                        }
+                                    }
+                                    break;
+                                }
+
+                            case 'n':
+                            case 'g':
+                                {
+                                    // jest ladna pogoda, lato, noc+głęboka noc, dowolny dzien
+                                    if ((temp >= 0) && (temp <= 30))
+                                    {
+                                        bieganie();
+                                        standardowe();
+                                    }
+                                    break;
+                                }
+                            default:
+                                {
+                                    Debug.WriteLine("Błąd", "Nie ma poryDnia"); break;
+                                }
+
+                        }
+                        break;
+                    }
+                case 'j':
+                    { // jesien
+
+                        switch (poraDnia)
+                        {
+                            case 'r':
+                                {
+
+                                    // jest ladna pogoda, jesien, ranek, dowolny dzień tygodnia (bo do
+                                    // 10 i tak wszystko zamknięte)
+
+                                    if ((temp >= -5) && (temp <= 30))
+                                    {
+                                        bieganie();
+                                        standardowe();
+                                    }
+
+                                    break;
+                                }
+
+                            case 'p':
+                            case 'o':
+                            case 'w':
+                                {
+                                    if ((dzienTygodnia.Equals("Monday"))
+                        || (dzienTygodnia.Equals("Tuesday"))
+                        || (dzienTygodnia.Equals("Wednesday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Friday"))
+                        || (dzienTygodnia.Equals("Saturday")))
+                                    {
+
+                                        // jest ladna pogoda, jesien, południe+dzien+popoludnie+wieczór, na
+                                        // tygodniu + sobota
+
+                                        if ((temp>=-30)&&(temp<-5))
+                                        {
+                                            naHali();
+
+                                        }
+                                        else if ((temp >= -5) && (temp <= 35))
+                                        {
+                                            bieganie();
+                                            standardowe();
+                                            naHali();
+                                            naDworze();
+
+                                        }
+                                    }
+
+                                    else
+                                    {
+
+                                        // jest ladna pogoda, jesien, południe+dzien+popoludnie+wieczór,
+                                        // niedziela
+                                        if ((temp >= -5) && (temp <= 35))
+                                        {
+                                            bieganie();
+                                            standardowe();
+                                            listArray.Add("Jazda konna");
+                                        }
+
+                                    }
+
+                                    break;
+                                }
+
+                            case 'n':
+                            case 'g':
+                                {
+                                    // jest ladna pogoda, jesien, noc+głęboka noc, dowolny dzien
+                                    if ((temp >= -5) && (temp <= 25))
+                                    {
+                                        bieganie();
+                                        standardowe();
+                                    }
+
+                                    break;
+                                }
+                            default:
+                                {
+                                    Debug.WriteLine("Błąd", "Nie ma poryDnia");
+                                }
+                                break;
+                        }
+
+                        break;
+                    }
+                case 'z':
+                    { // zima
+
+                        switch (poraDnia)
+                        {
+                            case 'r':
+                                {
+
+                                    // jest ladna pogoda, zima, ranek, dowolny dzień tygodnia (bo do
+                                    // 10 i tak wszystko zamknięte)
+
+                                    if ((temp >= -15) && (temp <= 20))
+                                    {
+                                        bieganie();
+                                        standardowe();
+                                        listArray.Add("Sanki");
+                                    }
+
+                                    break;
+                                }
+
+                            case 'p':
+                            case 'o':
+                            case 'w':
+                                {
+                                    if ((dzienTygodnia.Equals("Monday"))
+                        || (dzienTygodnia.Equals("Tuesday"))
+                        || (dzienTygodnia.Equals("Wednesday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Friday"))
+                        || (dzienTygodnia.Equals("Saturday")))
+                                    {
+
+                                        // jest ladna pogoda, zima, południe+dzien+popoludnie+wieczór, na
+                                        // tygodniu + sobota
+
+                                        if ((temp>=-30)&&(temp<=-15))
+                                        {
+                                            naHali();
+                                        }
+
+                                        else if ((temp >= -15) && (temp < 20))
+                                        {
+                                            bieganie();
+                                            standardowe();
+                                            naHali();
+                                            naDworze();
+                                            wZimie();
+                                            listArray.Add("Sanki");
+
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        // jest ladna pogoda, zima, południe+dzien+popoludnie+wieczór,
+                                        // niedziela
+                                        if ((temp >= -10) && (temp <= 20))
+                                        {
+                                            bieganie();
+                                            standardowe();
+                                        }
+
+                                    }
+
+                                    break;
+                                }
+
+                            case 'n':
+                            case 'g':
+                                {
+                                    // jest ladna pogoda, zima, noc+głęboka noc, dowolny dzien
+                                    if ((temp >= -10) && (temp <= 20))
+                                    {
+                                        bieganie();
+                                        standardowe();
+                                    }
+
+                                    break;
+                                }
+                            default:
+                                {
+                                    Debug.WriteLine("Błąd", "Nie ma poryDnia");
+                                }
+                                break;
+                        }
+
+                        break;
+                    }
+                default:
+                    {
+                        Debug.WriteLine("Błąd", "Zła pora roku");
+                        break;
+                    }
+
+            }
+        }
+
+        public void deszczowaPogoda(char poraDnia)
+        {
+
+            char poraRoku = getPoraRoku();
+            int temp=0;
+            if (int.TryParse(temperatura, out temp))
+                Debug.WriteLine("deszczowa: "+temp);
+            switch (poraRoku)
+            {
+                case 'w':
+                    {
+                        // wiosna
+                        switch (poraDnia)
+                        {
+                            case 'r':
+                                {
+
+                                    // jest deszczowa pogoda, wiosna, ranek, dowolny dzień tygodnia (bo
+                                    // do 10 i tak wszystko zamknięte)
+
+                                    if ((temp >= -5) && (temp <= 25))
+                                    {
+                                        //co się robi rano, kiedy pada?
+                                        listArray.Add("Śpij dalej");
+                                        listArray.Add("Zostań w domu");
+                                    }
+                                    break;
+                                }
+
+                            case 'p':
+                            case 'o':
+                            case 'w':
+                                {
+                                    if ((dzienTygodnia.Equals("Monday"))
+                        || (dzienTygodnia.Equals("Tuesday"))
+                        || (dzienTygodnia.Equals("Wednesday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Friday"))
+                        || (dzienTygodnia.Equals("Saturday")))
+                                    {
+
+                                        // jest deszczowa pogoda, wiosna, południe+dzien+popoludnie+wieczór, na
+                                        // tygodniu + sobota
+
+                                        if ((temp>=-10)&&(temp<0))
+                                        {
+                                            naHali();
+                                        }
+                                        else if ((temp >= 0) && (temp < 35))
+                                        {
+                                            naHali();
+
+                                        }
+                                    }
+
+                                    break;
+                                }
+
+                            // w nocy i tak doda "Zostań w domu"
+
+                            default:
+                                {
+                                    Debug.WriteLine("Deszczowo", "Zostań w domu");
+                                    break;
+                                }
+
+                        }
+                        break;
+                    }
+                case 'l':
+                    {// lato
+
+                        switch (poraDnia)
+                        {
+                            case 'r':
+                                {
+
+                                    // jest deszczowa pogoda, lato, ranek, dowolny dzień tygodnia (bo do
+                                    // 10 i tak wszystko zamknięte)
+                                    listArray.Add("Czytaj książkę");
+                                    listArray.Add("Zostań w domu");
+                                    break;
+                                }
+
+                            case 'p':
+                            case 'o':
+                            case 'w':
+                                {
+                                    if ((dzienTygodnia.Equals("Monday"))
+                        || (dzienTygodnia.Equals("Tuesday"))
+                        || (dzienTygodnia.Equals("Wednesday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Friday"))
+                        || (dzienTygodnia.Equals("Saturday")))
+                                    {
+
+                                        // jest deszczowa pogoda, lato, południe+dzien+popoludnie+wieczór, na
+                                        // tygodniu + sobota
+
+                                        if ((temp>=-5)&&(temp<=35))
+                                        {
+                                            naHali();
+                                        }
+
+                                    }
+                                    break;
+                                }
+
+
+                            default:
+                                {
+                                    Debug.WriteLine("Deszczowo", "Zostań w domu");
+                                    break;
+                                }
+
+                        } break;
+                    }
+                case 'j':
+                    { // jesien
+
+                        switch (poraDnia)
+                        {
+                            case 'r':
+                                {
+
+                                    // jest deszczowa pogoda, jesien, ranek, dowolny dzień tygodnia (bo do
+                                    // 10 i tak wszystko zamknięte)
+                                    listArray.Add("Śpij dalej");
+                                    break;
+                                }
+
+                            case 'p':
+                            case 'o':
+                            case 'w':
+                                {
+                                    if ((dzienTygodnia.Equals("Monday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Wednesday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Friday"))
+                        || (dzienTygodnia.Equals("Saturday")))
+                                    {
+
+                                        // jest deszczowa pogoda, jesien, południe+dzien+popoludnie+wieczór, na
+                                        // tygodniu + sobota
+
+                                        if ((temp>=-20)&&(temp<=35))
+                                        {
+                                            naHali();
+                                        }
+
+                                    }
+
+
+                                    break;
+                                }
+                            default:
+                                {
+                                    Debug.WriteLine("Deszczowo", "Zostań w domu");
+                                }
+                                break;
+                        }
+
+                        break;
+                    }
+                case 'z':
+                    { // zima
+
+                        switch (poraDnia)
+                        {
+                            case 'r':
+                                {
+
+                                    // jest deszczowa pogoda, zima, ranek, dowolny dzień tygodnia (bo do
+                                    // 10 i tak wszystko zamknięte)
+                                    listArray.Add("Śpij dalej");
+                                    break;
+                                }
+
+                            case 'p':
+                            case 'o':
+                            case 'w':
+                                {
+                                    if ((dzienTygodnia.Equals("Monday"))
+                        || (dzienTygodnia.Equals("Tuesday"))
+                        || (dzienTygodnia.Equals("Wednesday"))
+                        || (dzienTygodnia.Equals("Thursday"))
+                        || (dzienTygodnia.Equals("Friday"))
+                        || (dzienTygodnia.Equals("Saturday")))
+                                    {
+
+                                        // jest deszczowa pogoda, zima, południe+dzien+popoludnie+wieczór, na
+                                        // tygodniu + sobota
+
+                                        if ((temp>=-30)&&(temp<=20))
+                                        {
+                                            naHali();
+                                        }
+                                    }
+                                    break;
+                                }
+
+
+                            default:
+                                {
+                                    Debug.WriteLine("Deszczowo", "Zostań w domu");
+                                }
+                                break;
+                        }
+
+                        break;
+                    }
+                default:
+                    {
+                        Debug.WriteLine("Błąd", "Zła pora roku");
+                        break;
+                    }
+
+            }
+        }
+
+        public char getPoraRoku()
+        {
+            // można dodać np. przedwiośnie
+            char c;
+
+            if ((miesiac == 4) || (miesiac == 5))
+            { // kwiecien-maj
+                c = 'w';
+            }
+            else if ((miesiac >= 6) && (miesiac <= 8))
+            { // czerwiec-sierpien
+                c = 'l';
+            }
+            else if ((miesiac >= 9) && (miesiac <= 11))
+            { // wrzesien-list
+                c = 'j';
+            }
+            else // grudzien-marzec
+            {
+                c = 'z';
+            }
+
+            return c;
+
+        }
+
+        public void bieganie()
+        {
+            listArray.Add("Bieganie");
+
+        }
+
+        public void standardowe()
+        {
+            listArray.Add("Rower");
+            listArray.Add("Joga");
+            listArray.Add("Nordic walking");
+            listArray.Add("Rolki");
+            listArray.Add("Wrotki");
+            listArray.Add("Deskorolka");
+
+        }
+
+        public void naHali()
+        {
+
+            listArray.Add("Siatkówka");
+            listArray.Add("Koszykówka");
+            listArray.Add("Piłka nożna");
+            listArray.Add("Badminton");
+            listArray.Add("Squash");
+            listArray.Add("Siłownia");
+            listArray.Add("Szermierka");
+            listArray.Add("Łucznictwo");
+            listArray.Add("Strzelnica");
+            listArray.Add("Ściana wspinaczkowa");
+            listArray.Add("Trening sztuk walki");
+            listArray.Add("Basen");
+            listArray.Add("Ping-pong");
+
+        }
+
+        public void naDworze()
+        {
+
+            listArray.Add("BMX");
+            listArray.Add("Quady");
+            listArray.Add("Gocardy");
+            listArray.Add("Golf");
+            listArray.Add("Jazda konna");
+            listArray.Add("Paintball");
+            listArray.Add("Tenis");
+
+        }
+
+        public void wodne()
+        {
+            listArray.Add("Pływanie");
+            listArray.Add("Kajaki");
+            listArray.Add("Pływanie łódką"); // pontonem?
+            listArray.Add("Nurkowanie");
+            listArray.Add("Narty wodne");
+            listArray.Add("Piłka wodna");
+        }
+
+        public void wZimie()
+        {
+            listArray.Add("Łyżwy");
+            listArray.Add("Narciarstwo");
+            listArray.Add("Hokej");
+            listArray.Add("Sanki");
+
+        }
+
+        public void nadMorzem()
+        {
+            listArray.Add("Serfowanie");
+            listArray.Add("Siatkówka plażowa");
+
+        }
+
+        public void ekstremalne()
+        {
+            listArray.Add("Parkour");
+            listArray.Add("Bungee");
+            listArray.Add("Paralotnia");
+            listArray.Add("Skok ze spadochronem");
+            listArray.Add("Windsurfing");
+            // polowanie jednak nie
+            listArray.Add("Lot balonem");
+        }
+
 
     }
 }
