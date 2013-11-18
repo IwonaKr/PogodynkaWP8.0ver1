@@ -43,12 +43,12 @@ namespace PogodynkaWP8._0ver1
         public static Astronomy astronomy;
 
         //do sportów
-        public string pog;
-        public string wiatr;
-        public int godzina;
-        public int miesiac;
-        public string dzienTygodnia;
-        public string temperatura;
+        public string pog="";
+        public string wiatr="";
+        public int godzina=0;
+        public int miesiac=0;
+        public string dzienTygodnia="";
+        public string temperatura="";
 
         public Pogoda()
         {
@@ -144,7 +144,7 @@ namespace PogodynkaWP8._0ver1
         {
             // throw new NotImplementedException();
             var nazwaSportu = (sender as ListBox).SelectedItem as String;
-           
+
             Debug.WriteLine("Działa to to?                 "+ nazwaSportu);
         }
 
@@ -308,6 +308,8 @@ namespace PogodynkaWP8._0ver1
                     godzina=dt.Hour;
                     temperatura=hf.tempC;
                     wiatr=hf.windKph;
+                    if (pog.Equals(""))
+                        pog=hf.condition;
                     i++;
                 }
                 HourlyForecast.Add(hf);
@@ -339,12 +341,12 @@ namespace PogodynkaWP8._0ver1
 
         private void obrabianieConditions(XDocument doc)
         {
-
+            var current_obs = (from d in doc.Descendants()
+                               where (d.Name.LocalName=="current_observation")
+                               select d).FirstOrDefault();
             if (czyToGPS)
             {
-                var current_obs = (from d in doc.Descendants()
-                                   where (d.Name.LocalName=="current_observation")
-                                   select d).FirstOrDefault();
+
                 Debug.WriteLine(current_obs.ToString());
 
                 var disLoc = (from d in current_obs.Descendants()
@@ -354,12 +356,7 @@ namespace PogodynkaWP8._0ver1
                 //             where (d.Name.LocalName=="full")
                 //             select d).FirstOrDefault();
                 /*Pobieranie aktualnych danych */
-                ForecastDay curObs = new ForecastDay();
-                curObs.conditions=current_obs.Element("weather").Value;
-                pog=curObs.conditions; //do sportów potrzebne
-                curObs.highTempC=current_obs.Element("temp_c").Value; //taka zwykła temperatura
-                curObs.lowTempC=current_obs.Element("feelslike_c").Value; //odczuwalna
-                curObs.icon=current_obs.Element("icon").Value;
+
 
 
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
@@ -367,22 +364,50 @@ namespace PogodynkaWP8._0ver1
                     this.miasto=disLoc.Element("full").Value;
                     this.miastoTB.Text=disLoc.Element("full").Value;
                     Debug.WriteLine(disLoc.ToString());
-
-                    this.textBox1.Text=curObs.conditions+"\nTemperatura: "+curObs.highTempC+"C     Odczuwalna: "+curObs.lowTempC+"C\n"+
-                        "Wiatr: "+current_obs.Element("wind_kph").Value+"km/h   Odczuwalny: "+current_obs.Element("wind_gust_kph").Value+"km/h   "+current_obs.Element("wind_dir").Value+"\n"+
-                        "Wilgotność: "+current_obs.Element("relative_humidity").Value+
-                        "\nCiśnienie: "+current_obs.Element("pressure_mb").Value+"hPa, "+current_obs.Element("pressure_trend").Value+
-                        "\nWidoczność: "+current_obs.Element("visibility_km").Value+"km"+
-                        "\nOpady (godz/dzień): "+current_obs.Element("precip_1hr_metric").Value+"mm/"+current_obs.Element("precip_today_metric").Value+"mm";
-                    //TO DO
-                    //TUtaj dodać to podstawowe info o aktualnychh warunkach pogodowych
-                    Uri uri = new Uri("Icons/"+curObs.icon+".png", UriKind.Relative);
-                    ImageSource imgSource = new BitmapImage(uri);
-                    this.ikonka.Source = imgSource;
                 });
 
 
             }
+            ForecastDay curObs = new ForecastDay();
+            curObs.conditions=current_obs.Element("weather").Value;
+            if (curObs.conditions.Equals(null))
+                pog=" ";
+            else
+                pog=curObs.conditions; //do sportów potrzebne
+            curObs.highTempC=current_obs.Element("temp_c").Value; //taka zwykła temperatura
+            curObs.lowTempC=current_obs.Element("feelslike_c").Value; //odczuwalna
+            curObs.icon=current_obs.Element("icon").Value;
+
+            Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+                String cos = "";
+                cos =pog+"\nTemperatura: "+curObs.highTempC+"C     Odczuwalna: "+curObs.lowTempC+"C\n"+
+                        "Wiatr: "+current_obs.Element("wind_kph").Value+"km/h   Odczuwalny: "+current_obs.Element("wind_gust_kph").Value+"km/h   "+current_obs.Element("wind_dir").Value+"\n"+
+                        "Wilgotność: "+current_obs.Element("relative_humidity").Value+
+                        "\nCiśnienie: "+current_obs.Element("pressure_mb").Value+"hPa, "+current_obs.Element("pressure_trend").Value+"\nWidoczność: ";
+                if (!(current_obs.Element("visibility_km").Value).Equals("N/A"))
+                    cos+=current_obs.Element("visibility_km").Value+"km\nOpady (dzień/godz):";
+                else
+                    cos+=" \nOpady (dzien/godz): ";
+                //        "\nWidoczność: "+current_obs.Element("visibility_km").Value+"km\nOpady (dzień/godz):";
+                if (!(current_obs.Element("precip_1hr_metric").Value).Contains('-'))
+                    cos=cos+current_obs.Element("precip_1hr_metric").Value+" mm/";
+                else
+                    cos+=" - /";
+                if (!(current_obs.Element("precip_today_metric").Value).Contains('-'))
+                    cos+=current_obs.Element("precip_today_metric").Value+" mm";
+                else
+                    cos+=" -";
+                //        "\nOpady (godz/dzień): "+current_obs.Element("precip_1hr_metric").Value+"mm/"+current_obs.Element("precip_today_metric").Value+"mm";
+                this.textBox1.Text=cos;
+                //TO DO
+                //TUtaj dodać to podstawowe info o aktualnychh warunkach pogodowych
+                Uri uri = new Uri("Icons/"+curObs.icon+".png", UriKind.Relative);
+                ImageSource imgSource = new BitmapImage(uri);
+                this.ikonka.Source = imgSource;
+
+            });
+
             var txt_forecast = (from d in doc.Descendants()
                                 where (d.Name.LocalName == "txt_forecast")
                                 select d).ToList();
