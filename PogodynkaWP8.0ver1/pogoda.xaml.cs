@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -11,9 +12,12 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Windows.Resources;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Phone.Controls;
+using Microsoft.Phone.Tasks;
+using Microsoft.Xna.Framework.Media;
 
 namespace PogodynkaWP8._0ver1
 {
@@ -49,6 +53,8 @@ namespace PogodynkaWP8._0ver1
         public int miesiac=0;
         public string dzienTygodnia="";
         public string temperatura="";
+
+        public WriteableBitmap wbFinal=null;
 
         public Pogoda()
         {
@@ -113,7 +119,12 @@ namespace PogodynkaWP8._0ver1
 
                 obrabianieHourlyForecast(doc);
 
+
                 wyborSportow();
+
+                ubranie();
+
+
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
 
@@ -125,6 +136,8 @@ namespace PogodynkaWP8._0ver1
                     this.sportyLB.ItemsSource=listArray;
                     this.sportyLB.SelectionChanged+=sportyLB_SelectionChanged;
                     //sportySP.Children.Add(listView1);
+
+                    //this.ubranieIMG.Source=wbFinal;
                 });
 
 
@@ -140,12 +153,129 @@ namespace PogodynkaWP8._0ver1
             }
         }
 
+
+        public void ubranie()
+        {
+
+            string[] files = new string[] { "bluza_k.png", "buty_k.png", "czapka_k.png", "dlspodnie_k.png" };
+
+            List<BitmapImage> images = new List<BitmapImage>(); // BitmapImage list.
+            int width = 0; // Final width.
+            int height = 0; // Final height.
+            Debug.WriteLine("TUTAJ, w ubraniu na początku");
+            Dispatcher.BeginInvoke(() =>
+            {
+                WriteableBitmap wb = null;
+                try
+                {
+                    foreach (string image in files)
+                    {
+                        // Create a Bitmap from the file and add it to the list    
+
+                        BitmapImage img = new BitmapImage(new Uri("Ubrania/"+image, UriKind.RelativeOrAbsolute));
+
+                        StreamResourceInfo r = System.Windows.Application.GetResourceStream(new Uri("Ubrania/"+image, UriKind.RelativeOrAbsolute));
+                        img.SetSource(r.Stream);
+                        Debug.WriteLine("Po i ");
+                        wb = new WriteableBitmap(img);
+
+                        Debug.WriteLine("LOL");
+                        //Update the size of the final bitmap
+                        width = wb.PixelWidth > width ? wb.PixelWidth : width;
+                        height = wb.PixelHeight > height ? wb.PixelHeight : height;
+
+                        images.Add(img);
+
+                    }
+                }
+                catch (Exception poooo)
+                {
+                    Debug.WriteLine(poooo.Message);
+                }
+                Debug.WriteLine("po pętelce");
+                // Create a bitmap to hold the combined image 
+                BitmapImage finalImage = new BitmapImage();
+                Debug.WriteLine("Po finalImage");
+
+                StreamResourceInfo sri = System.Windows.Application.GetResourceStream(new Uri("Ubrania/kobieta.png",
+                    UriKind.RelativeOrAbsolute));
+                finalImage.SetSource(sri.Stream);
+                wbFinal= new WriteableBitmap(finalImage);
+
+                width=finalImage.PixelWidth;
+                height=finalImage.PixelHeight;
+
+                using (MemoryStream mem = new MemoryStream())
+                {
+
+                    foreach (BitmapImage item in images)
+                    {
+                        Image image = new Image();
+                        image.Height = height;
+                        image.Width = width;
+                        image.Source = item;
+
+                        // TranslateTransform                      
+                        TranslateTransform tf = new TranslateTransform();
+                        tf.X = 0;
+                        tf.Y = 0;
+                        wbFinal.Render(image, tf);
+
+                        // tempHeight += item.PixelHeight;
+                    }
+
+                    wbFinal.Invalidate();
+                    wbFinal.SaveJpeg(mem, width, height, 0, 100);
+                    mem.Seek(0, System.IO.SeekOrigin.Begin);
+
+                    // Show image. 
+                    Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                        ubranieIMG.Source = wbFinal;
+                    });
+                }
+
+                //// Save image.
+                using (IsolatedStorageFile iso = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    String strImageName = "demo.jpg";  // File name.
+
+                    if (iso.FileExists(strImageName))
+                    {
+                        iso.DeleteFile(strImageName);
+                    }
+
+                    using (IsolatedStorageFileStream isostream = iso.CreateFile(strImageName))
+                    {
+                        // Encode WriteableBitmap object to a JPEG stream.
+                        System.Windows.Media.Imaging.Extensions.SaveJpeg(wbFinal, isostream, wbFinal.PixelWidth, wbFinal.PixelHeight, 0, 85);
+                    }
+
+                    using (IsolatedStorageFileStream fileStream = iso.OpenFile(strImageName, FileMode.OpenOrCreate,
+                        FileAccess.Read))
+                    {
+                        MediaLibrary mediaLibrary = new MediaLibrary();
+                        Picture pic = mediaLibrary.SavePicture(strImageName, fileStream);
+                    }
+                }
+            });
+
+
+        }
+
         void sportyLB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // throw new NotImplementedException();
             var nazwaSportu = (sender as ListBox).SelectedItem as String;
 
             Debug.WriteLine("Działa to to?                 "+ nazwaSportu);
+            var wbt = new WebBrowserTask();
+            // String uri = "https://maps.google.pl/maps?q=" + miasto + "+"+ nazwaSportu;
+            // wbt.URL = "https://maps.google.pl/";
+            //wbt.URL = "https://maps.google.pl/maps?q=" + miasto + "+" + "\""+nazwaSportu+"\"";
+            Uri uri = new Uri("https://maps.google.pl/maps?q=" + miasto + "+" + "\""+nazwaSportu+"\"", UriKind.RelativeOrAbsolute);
+            wbt.Uri=uri;
+            wbt.Show();
         }
 
 
@@ -1469,6 +1599,11 @@ namespace PogodynkaWP8._0ver1
             // polowanie jednak nie
             listArray.Add("Lot balonem");
         }
+
+
+
+
+
 
 
     }

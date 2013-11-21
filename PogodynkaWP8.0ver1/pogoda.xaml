@@ -17,7 +17,7 @@
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
         <phone:Pivot Title="POGODYNKA">
-            <!--Pivot item one-->
+            <!--Aktualna pogoda-->
             <phone:PivotItem Header="pogoda">
                 <ScrollViewer x:Name="scrollViewer">
                     <StackPanel x:Name="glownyStackPanel">
@@ -29,6 +29,7 @@
                 </ScrollViewer>
             </phone:PivotItem>
 
+            <!--Pogoda na kolejne godziny-->
             <phone:PivotItem Header="godzinowa">
                 <ScrollViewer>
                     <StackPanel x:Name="hStackPanel">
@@ -37,28 +38,24 @@
                 </ScrollViewer>
             </phone:PivotItem>
 
+            <!--Pogoda na kolejnych 10 dni-->
             <phone:PivotItem Header="następne dni">
                 <ScrollViewer>
                     <StackPanel x:Name="ndStackPanel"/>
                 </ScrollViewer>
             </phone:PivotItem>
 
-            <!--Pivot item two-->
+            <!--Ubranie-->
             <phone:PivotItem Header="ubranie">
-                <Grid/>
+                <ScrollViewer>
+                    <Image x:Name="ubranieIMG" Source="Clothes/kobieta.png"/>
+
+                </ScrollViewer>
             </phone:PivotItem>
 
-            <!-- Pivot item three-->
+            <!-- Sporty dla aktualnej pogody-->
             <phone:PivotItem Header="sport">
-                <ScrollViewer>
-                    <!--<StackPanel x:Name="sportySP"/>-->
-                    <!--<phone:LongListSelector x:Name="sportySP" FontSize="{StaticResource PhoneFontSizeLarge}">
-                        <phone:LongListSelector.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}"/>
-                            </DataTemplate>
-                        </phone:LongListSelector.ItemTemplate>
-                    </phone:LongListSelector>-->
+                <!--<ScrollViewer>-->
                     <ListBox x:Name="sportyLB"  FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -66,9 +63,16 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-
+                <!--</ScrollViewer>-->
+            </phone:PivotItem>
+            
+            <phone:PivotItem Header="wypoczynek">
+                <ScrollViewer>
+                    
                 </ScrollViewer>
             </phone:PivotItem>
+            
+            
         </phone:Pivot>
     </Grid>
 

@@ -172,6 +172,19 @@
     <Content Include="Images\Write.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Ubrania\bluza_k.png" />
+    <Content Include="Ubrania\buty_k.png" />
+    <Content Include="Ubrania\ciezkiebuty_k.png" />
+    <Content Include="Ubrania\czapka_k.png" />
+    <Content Include="Ubrania\dlrekaw_k.png" />
+    <Content Include="Ubrania\dlspodnie_k.png" />
+    <Content Include="Ubrania\kobieta.png" />
+    <Content Include="Ubrania\parasolka_k.png" />
+    <Content Include="Ubrania\podkoszulek_k.png" />
+    <Content Include="Ubrania\sandalki_k.png" />
+    <Content Include="Ubrania\spodniedl_k.png" />
+    <Content Include="Ubrania\spodniekr_k.png" />
+    <Content Include="Ubrania\tshirt_k.png" />
     <Resource Include="Icons\chanceflurries.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
