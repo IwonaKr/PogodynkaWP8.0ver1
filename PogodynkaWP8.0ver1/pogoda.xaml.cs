@@ -164,6 +164,49 @@ namespace PogodynkaWP8._0ver1
             if ((pog.Equals("deszcz"))||(pog.Equals("lekki deszcz"))||(pog.Equals("lekkie przelotne deszcze"))||(pog.Equals("mżawka"))||(czyBedziePadac))
                 ubrania.Add("parasolka_k.png");
 
+            int temp=0, t=0;;
+            if (int.TryParse(temperatura, out t))
+                temp = t;
+
+            if (temp<2)
+            {
+                ubrania.Add("buty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("kurtka_k.png");
+                ubrania.Add("czapka_k.png");
+            }
+            else if (temp<10)
+            {
+                ubrania.Add("buty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("kurtka_k.png"); //tu dałabym cieplejszą kurtkę
+            }
+            else if (temp<18)
+            {
+                ubrania.Add("buty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("kurtka_k.png"); //lżejsza kurtka bądź płaszczyk
+            }
+            else if (temp<23)
+            {
+                ubrania.Add("buty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("dlrekaw.png");
+            }
+            else if (temp<28)
+            {
+                ubrania.Add("sandalki_k.png");
+                ubrania.Add("spodniekr_k.png");
+                ubrania.Add("tshirt_k.png");
+            }
+            else
+            {
+                ubrania.Add("sandalki_k.png");
+                ubrania.Add("spodniekr_k.png");
+                ubrania.Add("podkoszulek_k.png");
+            }
+
+
         }
 
 
@@ -171,9 +214,10 @@ namespace PogodynkaWP8._0ver1
         {
 
             pogodaDlaUbran();
+            ubrania.Add("spodniedl_k.png");
             ubrania.Add("bluza_k.png");
             ubrania.Add("buty_k.png");
-            ubrania.Add("spodniekr_k.png");
+            
             //string[] files = new string[] { "bluza_k.png", "buty_k.png", "czapka_k.png", "dlspodnie_k.png" };
 
             List<BitmapImage> images = new List<BitmapImage>();
@@ -247,29 +291,6 @@ namespace PogodynkaWP8._0ver1
                     });
                 }
 
-                //// Save image.
-                using (IsolatedStorageFile iso = IsolatedStorageFile.GetUserStoreForApplication())
-                {
-                    String strImageName = "demo.jpg";  // File name.
-
-                    if (iso.FileExists(strImageName))
-                    {
-                        iso.DeleteFile(strImageName);
-                    }
-
-                    using (IsolatedStorageFileStream isostream = iso.CreateFile(strImageName))
-                    {
-                        // Encode WriteableBitmap object to a JPEG stream.
-                        System.Windows.Media.Imaging.Extensions.SaveJpeg(wbFinal, isostream, wbFinal.PixelWidth, wbFinal.PixelHeight, 0, 85);
-                    }
-
-                    using (IsolatedStorageFileStream fileStream = iso.OpenFile(strImageName, FileMode.OpenOrCreate,
-                        FileAccess.Read))
-                    {
-                        MediaLibrary mediaLibrary = new MediaLibrary();
-                        Picture pic = mediaLibrary.SavePicture(strImageName, fileStream);
-                    }
-                }
             });
 
 
