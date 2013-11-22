@@ -115,12 +115,12 @@ namespace PogodynkaWP8._0ver1
                 weather = e.Result;
                 XmlReader reader = XmlReader.Create(new StringReader(weather));
                 XDocument doc = XDocument.Load(reader);
-                obrabianieConditions(doc);
 
                 obrabianieAstronomy(doc);
 
-                obrabianieHourlyForecast(doc);
+                obrabianieConditions(doc);
 
+                obrabianieHourlyForecast(doc);
 
                 wyborSportow();
 
@@ -164,7 +164,7 @@ namespace PogodynkaWP8._0ver1
             if ((pog.Equals("deszcz"))||(pog.Equals("lekki deszcz"))||(pog.Equals("lekkie przelotne deszcze"))||(pog.Equals("mżawka"))||(czyBedziePadac))
                 ubrania.Add("parasolka_k.png");
 
-            int temp=0, t=0;;
+            int temp=0, t=0; ;
             if (int.TryParse(temperatura, out t))
                 temp = t;
 
@@ -217,7 +217,7 @@ namespace PogodynkaWP8._0ver1
             ubrania.Add("spodniedl_k.png");
             ubrania.Add("bluza_k.png");
             ubrania.Add("buty_k.png");
-            
+
             //string[] files = new string[] { "bluza_k.png", "buty_k.png", "czapka_k.png", "dlspodnie_k.png" };
 
             List<BitmapImage> images = new List<BitmapImage>();
@@ -563,9 +563,16 @@ namespace PogodynkaWP8._0ver1
                     cos+=" -";
                 //        "\nOpady (godz/dzień): "+current_obs.Element("precip_1hr_metric").Value+"mm/"+current_obs.Element("precip_today_metric").Value+"mm";
                 this.textBox1.Text=cos;
-                //TO DO
-                //TUtaj dodać to podstawowe info o aktualnychh warunkach pogodowych
-                Uri uri = new Uri("Icons/"+curObs.icon+".png", UriKind.Relative);
+                Uri uri =null;
+                if ((DateTime.Now<astronomy.sunrise)||(DateTime.Now>astronomy.sunset)) //po zachodzie słońca
+                {
+                    Debug.WriteLine("sunrise: "+astronomy.sunrise.Hour+" "+astronomy.sunset.Hour);
+                    uri  =  new Uri("Icons/nt_"+curObs.icon+".png", UriKind.Relative);
+                }
+                else
+                {
+                    uri = new Uri("Icons/"+curObs.icon+".png", UriKind.Relative);
+                }
                 ImageSource imgSource = new BitmapImage(uri);
                 this.ikonka.Source = imgSource;
 
