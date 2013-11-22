@@ -43,7 +43,7 @@ namespace PogodynkaWP8._0ver1
         public static List<ForecastDay> dni2= new List<ForecastDay>(); //txt_forecast
         public static List<ForecastDay> SFDay = new List<ForecastDay>(); //SimpleForecast
         public static List<HourlyForecast> HourlyForecast = new List<HourlyForecast>();
-        public static ObservableCollection<String> listArray = new ObservableCollection<string>();
+        public static ObservableCollection<String> listArray = new ObservableCollection<string>(); //lista ze sportami
         public static Astronomy astronomy;
 
         //do sportów
@@ -54,7 +54,10 @@ namespace PogodynkaWP8._0ver1
         public string dzienTygodnia="";
         public string temperatura="";
 
+        //do ubrań
         public WriteableBitmap wbFinal=null;
+        public List<string> ubrania = new List<string>(); //lista z wybranymi ubraniami
+        public bool czyBedziePadac = false;
 
         public Pogoda()
         {
@@ -106,7 +109,6 @@ namespace PogodynkaWP8._0ver1
 
         void wc_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
-            //Console.WriteLine("Zabawa z XDocument");
             string weather="";
             try
             {
@@ -127,17 +129,10 @@ namespace PogodynkaWP8._0ver1
 
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
+                    ///Wyświetlanie listy sportów
 
-                    //LongListSelector listView1 = new LongListSelector();
-                    //LongListSelector listView1 = sportySP;
-                    //listView1.ItemsSource = listArray;
-
-                    //listView1.SelectionChanged +=listView1_SelectionChanged;
                     this.sportyLB.ItemsSource=listArray;
                     this.sportyLB.SelectionChanged+=sportyLB_SelectionChanged;
-                    //sportySP.Children.Add(listView1);
-
-                    //this.ubranieIMG.Source=wbFinal;
                 });
 
 
@@ -154,12 +149,34 @@ namespace PogodynkaWP8._0ver1
         }
 
 
+        public void pogodaDlaUbran()
+        {
+            string pogodaZaGodzine = "";
+            for (int i = 0; i < 2; i++)
+            {
+                pogodaZaGodzine=dni2.ElementAt(i).fcttextMetric;
+                var s=pogodaZaGodzine.Split('.');
+                string zapowiedz = s[0];
+
+                if ((zapowiedz.Equals("Możliwy deszcz"))||(zapowiedz.Equals("Możliwe burze")))
+                    czyBedziePadac=true;
+            }
+            if ((pog.Equals("deszcz"))||(pog.Equals("lekki deszcz"))||(pog.Equals("lekkie przelotne deszcze"))||(pog.Equals("mżawka"))||(czyBedziePadac))
+                ubrania.Add("parasolka_k.png");
+
+        }
+
+
         public void ubranie()
         {
 
-            string[] files = new string[] { "bluza_k.png", "buty_k.png", "czapka_k.png", "dlspodnie_k.png" };
+            pogodaDlaUbran();
+            ubrania.Add("bluza_k.png");
+            ubrania.Add("buty_k.png");
+            ubrania.Add("spodniekr_k.png");
+            //string[] files = new string[] { "bluza_k.png", "buty_k.png", "czapka_k.png", "dlspodnie_k.png" };
 
-            List<BitmapImage> images = new List<BitmapImage>(); // BitmapImage list.
+            List<BitmapImage> images = new List<BitmapImage>();
             int width = 0; // Final width.
             int height = 0; // Final height.
             Debug.WriteLine("TUTAJ, w ubraniu na początku");
@@ -168,7 +185,7 @@ namespace PogodynkaWP8._0ver1
                 WriteableBitmap wb = null;
                 try
                 {
-                    foreach (string image in files)
+                    foreach (string image in ubrania)
                     {
                         // Create a Bitmap from the file and add it to the list    
 
@@ -176,10 +193,7 @@ namespace PogodynkaWP8._0ver1
 
                         StreamResourceInfo r = System.Windows.Application.GetResourceStream(new Uri("Ubrania/"+image, UriKind.RelativeOrAbsolute));
                         img.SetSource(r.Stream);
-                        Debug.WriteLine("Po i ");
                         wb = new WriteableBitmap(img);
-
-                        Debug.WriteLine("LOL");
                         //Update the size of the final bitmap
                         width = wb.PixelWidth > width ? wb.PixelWidth : width;
                         height = wb.PixelHeight > height ? wb.PixelHeight : height;
@@ -192,10 +206,8 @@ namespace PogodynkaWP8._0ver1
                 {
                     Debug.WriteLine(poooo.Message);
                 }
-                Debug.WriteLine("po pętelce");
                 // Create a bitmap to hold the combined image 
                 BitmapImage finalImage = new BitmapImage();
-                Debug.WriteLine("Po finalImage");
 
                 StreamResourceInfo sri = System.Windows.Application.GetResourceStream(new Uri("Ubrania/kobieta.png",
                     UriKind.RelativeOrAbsolute));
@@ -512,7 +524,7 @@ namespace PogodynkaWP8._0ver1
             {
                 String cos = "";
                 cos =pog+"\nTemperatura: "+curObs.highTempC+"C     Odczuwalna: "+curObs.lowTempC+"C\n"+
-                        "Wiatr: "+current_obs.Element("wind_kph").Value+"km/h   Odczuwalny: "+current_obs.Element("wind_gust_kph").Value+"km/h   "+current_obs.Element("wind_dir").Value+"\n"+
+                        "Wiatr: "+current_obs.Element("wind_kph").Value+"km/h,   w porywach do: "+current_obs.Element("wind_gust_kph").Value+"km/h   "+current_obs.Element("wind_dir").Value+"\n"+
                         "Wilgotność: "+current_obs.Element("relative_humidity").Value+
                         "\nCiśnienie: "+current_obs.Element("pressure_mb").Value+"hPa, "+current_obs.Element("pressure_trend").Value+"\nWidoczność: ";
                 if (!(current_obs.Element("visibility_km").Value).Equals("N/A"))
