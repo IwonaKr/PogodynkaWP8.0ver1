@@ -55,7 +55,6 @@
 
             <!-- Sporty dla aktualnej pogody-->
             <phone:PivotItem Header="sport">
-                <!--<ScrollViewer>-->
                     <ListBox x:Name="sportyLB"  FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -63,13 +62,16 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                <!--</ScrollViewer>-->
             </phone:PivotItem>
             
             <phone:PivotItem Header="wypoczynek">
-                <ScrollViewer>
-                    
-                </ScrollViewer>
+                <ListBox x:Name="wypoczynekLB" FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" >
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </phone:PivotItem>
             
             

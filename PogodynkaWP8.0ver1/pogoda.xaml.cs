@@ -30,10 +30,11 @@ namespace PogodynkaWP8._0ver1
         public static List<ForecastDay> dni2= new List<ForecastDay>(); //txt_forecast
         public static List<ForecastDay> SFDay = new List<ForecastDay>(); //SimpleForecast
         public static List<HourlyForecast> HourlyForecast = new List<HourlyForecast>();
-        public static ObservableCollection<String> listArray = new ObservableCollection<string>(); //lista ze sportami
+        public static ObservableCollection<String> listaSportow = new ObservableCollection<string>(); //lista ze sportami
+        public static ObservableCollection<String> listaAktywnosci = new ObservableCollection<string>(); //lista dla wypoczynku
         public static Astronomy astronomy;
 
-        //do sportów
+        //do sportów i wypoczynku
         public string pog="";
         public string wiatr="";
         public int godzina=0;
@@ -117,13 +118,16 @@ namespace PogodynkaWP8._0ver1
 
                 ubranie();
 
+                wyborWypoczynku();
 
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    ///Wyświetlanie listy sportów
+                    ///Wyświetlanie listy sportów i aktywności
 
-                    this.sportyLB.ItemsSource=listArray;
+                    this.sportyLB.ItemsSource=listaSportow;
                     this.sportyLB.SelectionChanged+=sportyLB_SelectionChanged;
+                    this.wypoczynekLB.ItemsSource=listaAktywnosci;
+                    this.wypoczynekLB.SelectionChanged+=wypoczynekLB_SelectionChanged;
                 });
 
 
@@ -138,6 +142,161 @@ namespace PogodynkaWP8._0ver1
                 });
             }
         }
+
+        #region WYPOCZYNEK
+        public void wyborWypoczynku()
+        {
+            String pogoda2 = pog.ToLower();
+            if (pogoda2.Equals("pogodnie"))
+            {
+                ladnaPogodaWyp(poraDnia);
+            }
+            else if (pogoda2.Equals("przewaga chmur"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("obłoki zanikające"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("śnieg"))
+                deszczowaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("niewielkie zachmurzenie"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("deszcz"))
+                deszczowaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("lekki deszcz"))
+                deszczowaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("pochmurno"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("płatki mgły"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("lekkie przelotne deszcze"))
+                deszczowaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("lekka mżawka"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("zamglenia"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("mżawka"))
+                deszczowaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("mgła"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("lekka mgła"))
+                ladnaPogodaWyp(poraDnia);
+            else if (pogoda2.Equals("częściowe zamglenia"))
+                ladnaPogodaWyp(poraDnia);
+            else
+            {
+                //listaAktywnosci.Add("Nieznany rodzaj pogody");
+                zalezneWyp();
+                podDachemWyp();
+                podstawoweWyp();
+
+            }
+        }
+
+        private void deszczowaPogodaWyp(char poraDnia)
+        {
+            podDachemWyp();
+        }
+
+        private void ladnaPogodaWyp(char poraDnia)
+        {
+            int temp=0;
+            if (int.TryParse(temperatura, out temp))
+                Debug.WriteLine(temp);
+            if ((temp > -30) && (temp < 35))
+            {
+                podstawoweWyp();
+                niePadaWyp();
+                okazjonalneWyp();
+            }
+
+            podDachemWyp();
+            zalezneWyp();
+        }
+
+        private void zalezneWyp()
+        {
+            string pogoda2 = pog.ToLower();
+            if ((pogoda2.Equals("pogodnie"))||(pogoda2.Equals("niewielkie zachmurzenie"))||(pogoda2.Equals("obłoki zanikające")))
+            {
+                TimeSpan wschod1 = new TimeSpan(astronomy.sunrise.Hour-1, astronomy.sunrise.Minute, 0); //-1 godzina do wschodu
+                TimeSpan zachod1 = new TimeSpan(astronomy.sunset.Hour-1, astronomy.sunset.Minute, 0); //-1 godzina do zachodu
+                TimeSpan wschod = new TimeSpan(astronomy.sunrise.Hour, astronomy.sunrise.Minute, 0);
+                TimeSpan zachod = new TimeSpan(astronomy.sunset.Hour, astronomy.sunset.Minute, 0);
+                TimeSpan teraz = DateTime.Now.TimeOfDay;
+                if ((teraz<wschod)&&(teraz>wschod1))
+                {
+                    listaAktywnosci.Add("Podziwiaj wschód słońca");
+                    Debug.WriteLine("Wschód");
+                }
+                else if ((teraz<zachod)&&(teraz>zachod1))
+                {
+                    listaAktywnosci.Add("Podziwiaj zachód słońca");
+                    Debug.WriteLine("Zachód");
+                }
+                else if ((teraz>zachod) ||(teraz<wschod1))
+                {
+                    Debug.WriteLine("Gwiazdy");
+                    listaAktywnosci.Add("Podziwiaj gwiazdy");
+                }
+                else if ((teraz<zachod1)||(teraz>wschod))
+                {
+                    listaAktywnosci.Add("Podziwiaj chmury / niebo ");
+                    Debug.WriteLine("Chmury");
+                }
+                Debug.WriteLine(wschod.ToString()+" "+zachod.ToString()+" "+teraz.ToString());
+            }
+        }
+
+        private void podDachemWyp()
+        {
+            if ((poraDnia.Equals('p'))||(poraDnia.Equals('o'))||(poraDnia.Equals('w')))
+            {
+                listaAktywnosci.Add("Kino");
+                listaAktywnosci.Add("Kawiarnia");
+                listaAktywnosci.Add("Kręgle");
+                listaAktywnosci.Add("Muzeum");
+                listaAktywnosci.Add("Biblioteka");
+                listaAktywnosci.Add("Teatr");
+                listaAktywnosci.Add("Aquapark");
+                listaAktywnosci.Add("Zakupy");
+                listaAktywnosci.Add("Zajęcia plastyczne");
+                listaAktywnosci.Add("Zajęcia muzyczne");
+            }
+            if ((poraDnia.Equals('w')||(poraDnia.Equals('n'))))
+            {
+                listaAktywnosci.Add("Impreza");
+                listaAktywnosci.Add("Koncert");
+                listaAktywnosci.Add("Randka w ciemno");
+                listaAktywnosci.Add("Pub");
+            }
+        }
+
+        private void okazjonalneWyp()
+        {
+            listaAktywnosci.Add("Wydarzenie w mieście");
+        }
+
+        private void niePadaWyp()
+        {
+            listaAktywnosci.Add("Ogród zoologiczny");
+
+        }
+
+        private void podstawoweWyp()
+        {
+            listaAktywnosci.Add("Spacer");
+            listaAktywnosci.Add("Spotkanie z przyjaciółmi");
+            listaAktywnosci.Add("Spacer z psem");
+            listaAktywnosci.Add("Fotografowanie");
+            listaAktywnosci.Add("Rysowanie");
+            listaAktywnosci.Add("Gra na gitarze");
+        }
+
+        void wypoczynekLB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        #endregion WYPOCZYNEK
 
         //OBRABIANIE ASTRONOMII, POGODY GODZINOWEJ I NA NASTĘPNE DNI
         #region OBRABIANIE ASTRONOMII, POGODY GODZINOWEJ I NA NASTĘPNE DNI
@@ -819,7 +978,7 @@ namespace PogodynkaWP8._0ver1
                 }
 
             });
-            
+
         }
         #endregion UBRANIA
 
@@ -829,7 +988,8 @@ namespace PogodynkaWP8._0ver1
         {
             // throw new NotImplementedException();
             var nazwaSportu = (sender as ListBox).SelectedItem as String;
-            if (nazwaSportu.Equals("Nieznany rodzaj pogody")) {
+            if (nazwaSportu.Equals("Nieznany rodzaj pogody"))
+            {
                 Debug.WriteLine("Nieznany rodzaj pogody, dla którego nie ma żadnych sportów :C");
             }
             else
@@ -905,7 +1065,7 @@ namespace PogodynkaWP8._0ver1
             else if (pogoda2.Equals("częściowe zamglenia"))
                 ladnaPogoda(poraDnia);
             else
-                listArray.Add("Nieznany rodzaj pogody");
+                listaSportow.Add("Nieznany rodzaj pogody");
 
         }
 
@@ -975,13 +1135,13 @@ namespace PogodynkaWP8._0ver1
 
         public void standardowe()
         {
-            listArray.Add("Bieganie");
-            listArray.Add("Rower");
-            listArray.Add("Joga");
-            listArray.Add("Nordic walking");
-            listArray.Add("Rolki");
-            listArray.Add("Wrotki");
-            listArray.Add("Deskorolka");
+            listaSportow.Add("Bieganie");
+            listaSportow.Add("Rower");
+            listaSportow.Add("Joga");
+            listaSportow.Add("Nordic walking");
+            listaSportow.Add("Rolki");
+            listaSportow.Add("Wrotki");
+            listaSportow.Add("Deskorolka");
 
         }
 
@@ -990,19 +1150,19 @@ namespace PogodynkaWP8._0ver1
             char poraDnia=getPoraDnia();
             if (poraDnia.Equals('p')||(poraDnia.Equals('o'))||(poraDnia.Equals('w')))
             {
-                listArray.Add("Siatkówka");
-                listArray.Add("Koszykówka");
-                listArray.Add("Piłka nożna");
-                listArray.Add("Badminton");
-                listArray.Add("Squash");
-                listArray.Add("Siłownia");
-                listArray.Add("Szermierka");
-                listArray.Add("Łucznictwo");
-                listArray.Add("Strzelnica");
-                listArray.Add("Ściana wspinaczkowa");
-                listArray.Add("Trening sztuk walki");
-                listArray.Add("Basen");
-                listArray.Add("Ping-pong");
+                listaSportow.Add("Siatkówka");
+                listaSportow.Add("Koszykówka");
+                listaSportow.Add("Piłka nożna");
+                listaSportow.Add("Badminton");
+                listaSportow.Add("Squash");
+                listaSportow.Add("Siłownia");
+                listaSportow.Add("Szermierka");
+                listaSportow.Add("Łucznictwo");
+                listaSportow.Add("Strzelnica");
+                listaSportow.Add("Ściana wspinaczkowa");
+                listaSportow.Add("Trening sztuk walki");
+                listaSportow.Add("Basen");
+                listaSportow.Add("Ping-pong");
             }
 
         }
@@ -1013,21 +1173,21 @@ namespace PogodynkaWP8._0ver1
             {
                 if (!(poraRoku.Equals('z')))
                 {
-                    listArray.Add("BMX");
-                    listArray.Add("Quady");
-                    listArray.Add("Gokarty");
-                    listArray.Add("Golf");
-                    listArray.Add("Jazda konna");
-                    listArray.Add("Paintball");
-                    listArray.Add("Tenis");
+                    listaSportow.Add("BMX");
+                    listaSportow.Add("Quady");
+                    listaSportow.Add("Gokarty");
+                    listaSportow.Add("Golf");
+                    listaSportow.Add("Jazda konna");
+                    listaSportow.Add("Paintball");
+                    listaSportow.Add("Tenis");
                 }
                 else
                 {
-                    listArray.Add("Łyżwy");
-                    listArray.Add("Snowboard");
-                    listArray.Add("Narciarstwo");
-                    listArray.Add("Hokej");
-                    listArray.Add("Sanki");
+                    listaSportow.Add("Łyżwy");
+                    listaSportow.Add("Snowboard");
+                    listaSportow.Add("Narciarstwo");
+                    listaSportow.Add("Hokej");
+                    listaSportow.Add("Sanki");
                 }
 
             }
@@ -1035,26 +1195,26 @@ namespace PogodynkaWP8._0ver1
 
         public void okazjonalne()
         {
-            listArray.Add("Pływanie");
-            listArray.Add("Kajaki");
-            listArray.Add("Pływanie łódką"); // pontonem?
-            listArray.Add("Nurkowanie");
-            listArray.Add("Narty wodne");
-            listArray.Add("Piłka wodna");
-            listArray.Add("Serfowanie");
-            listArray.Add("Siatkówka plażowa");
+            listaSportow.Add("Pływanie");
+            listaSportow.Add("Kajaki");
+            listaSportow.Add("Pływanie łódką"); // pontonem?
+            listaSportow.Add("Nurkowanie");
+            listaSportow.Add("Narty wodne");
+            listaSportow.Add("Piłka wodna");
+            listaSportow.Add("Serfowanie");
+            listaSportow.Add("Siatkówka plażowa");
 
         }
 
         public void ekstremalne()
         {
-            listArray.Add("Parkour");
-            listArray.Add("Bungee");
-            listArray.Add("Paralotnia");
-            listArray.Add("Skok ze spadochronem");
-            listArray.Add("Windsurfing");
+            listaSportow.Add("Parkour");
+            listaSportow.Add("Bungee");
+            listaSportow.Add("Paralotnia");
+            listaSportow.Add("Skok ze spadochronem");
+            listaSportow.Add("Windsurfing");
             // polowanie jednak nie
-            listArray.Add("Lot balonem");
+            listaSportow.Add("Lot balonem");
         }
 
         #endregion SPORTY
