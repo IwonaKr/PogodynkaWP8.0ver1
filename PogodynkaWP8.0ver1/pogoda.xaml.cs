@@ -23,6 +23,7 @@ namespace PogodynkaWP8._0ver1
 {
     public partial class Pogoda : PhoneApplicationPage
     {
+        #region ZMIENNE
         public string miasto;
         public static string mess; //potrzebne do linka
         public bool czyToGPS;
@@ -46,6 +47,7 @@ namespace PogodynkaWP8._0ver1
         public WriteableBitmap wbFinal=null;
         public List<string> ubrania = new List<string>(); //lista z wybranymi ubraniami
         public bool czyBedziePadac = false;
+        #endregion
 
         public Pogoda()
         {
@@ -83,6 +85,7 @@ namespace PogodynkaWP8._0ver1
                 t.Start();
             }
         }
+
         void NewThread()
         {
             string url = "http://api.wunderground.com/api/c9d15b10ff3ed303/forecast/forecast10day/hourly/conditions/astronomy/lang:PL/q/"+mess+".xml";
@@ -136,153 +139,8 @@ namespace PogodynkaWP8._0ver1
             }
         }
 
-
-        public void pogodaDlaUbran()
-        {
-            string pogodaZaGodzine = "";
-            for (int i = 0; i < 2; i++)
-            {
-                pogodaZaGodzine=dni2.ElementAt(i).fcttextMetric;
-                var s=pogodaZaGodzine.Split('.');
-                string zapowiedz = s[0];
-
-                if ((zapowiedz.Equals("Możliwy deszcz"))||(zapowiedz.Equals("Możliwe burze")))
-                    czyBedziePadac=true;
-            }
-            if ((pog.Equals("deszcz"))||(pog.Equals("lekki deszcz"))||(pog.Equals("lekkie przelotne deszcze"))||(pog.Equals("mżawka"))||(czyBedziePadac))
-                ubrania.Add("parasolka_k.png");
-
-            int temp=0, t=0; ;
-            if (int.TryParse(temperatura, out t))
-                temp = t;
-
-            if (temp<2)
-            {
-                ubrania.Add("buty_k.png");
-                ubrania.Add("spodniedl_k.png");
-                ubrania.Add("kurtka_k.png");
-                ubrania.Add("czapka_k.png");
-            }
-            else if (temp<10)
-            {
-                ubrania.Add("buty_k.png");
-                ubrania.Add("spodniedl_k.png");
-                ubrania.Add("kurtka_k.png"); //tu dałabym cieplejszą kurtkę
-            }
-            else if (temp<18)
-            {
-                ubrania.Add("buty_k.png");
-                ubrania.Add("spodniedl_k.png");
-                ubrania.Add("kurtka_k.png"); //lżejsza kurtka bądź płaszczyk
-            }
-            else if (temp<23)
-            {
-                ubrania.Add("buty_k.png");
-                ubrania.Add("spodniedl_k.png");
-                ubrania.Add("dlrekaw.png");
-            }
-            else if (temp<28)
-            {
-                ubrania.Add("sandalki_k.png");
-                ubrania.Add("spodniekr_k.png");
-                ubrania.Add("tshirt_k.png");
-            }
-            else
-            {
-                ubrania.Add("sandalki_k.png");
-                ubrania.Add("spodniekr_k.png");
-                ubrania.Add("podkoszulek_k.png");
-            }
-
-
-        }
-
-
-        public void ubranie()
-        {
-
-            pogodaDlaUbran();
-            //ubrania.Add("spodniedl_k.png");
-            //ubrania.Add("bluza_k.png");
-            //ubrania.Add("buty_k.png");
-
-            //string[] files = new string[] { "bluza_k.png", "buty_k.png", "czapka_k.png", "dlspodnie_k.png" };
-
-            List<BitmapImage> images = new List<BitmapImage>();
-            int width = 0; // Final width.
-            int height = 0; // Final height.
-            Debug.WriteLine("TUTAJ, w ubraniu na początku");
-            Dispatcher.BeginInvoke(() =>
-            {
-                WriteableBitmap wb = null;
-                try
-                {
-                    foreach (string image in ubrania)
-                    {
-                        // Create a Bitmap from the file and add it to the list    
-
-                        BitmapImage img = new BitmapImage(new Uri("Ubrania/"+image, UriKind.RelativeOrAbsolute));
-
-                        StreamResourceInfo r = System.Windows.Application.GetResourceStream(new Uri("Ubrania/"+image, UriKind.RelativeOrAbsolute));
-                        img.SetSource(r.Stream);
-                        wb = new WriteableBitmap(img);
-                        //Update the size of the final bitmap
-                        width = wb.PixelWidth > width ? wb.PixelWidth : width;
-                        height = wb.PixelHeight > height ? wb.PixelHeight : height;
-
-                        images.Add(img);
-
-                    }
-                }
-                catch (Exception poooo)
-                {
-                    Debug.WriteLine(poooo.Message);
-                }
-                // Create a bitmap to hold the combined image 
-                BitmapImage finalImage = new BitmapImage();
-
-                StreamResourceInfo sri = System.Windows.Application.GetResourceStream(new Uri("Ubrania/kobieta.png",
-                    UriKind.RelativeOrAbsolute));
-                finalImage.SetSource(sri.Stream);
-                wbFinal= new WriteableBitmap(finalImage);
-
-                width=finalImage.PixelWidth;
-                height=finalImage.PixelHeight;
-
-                using (MemoryStream mem = new MemoryStream())
-                {
-
-                    foreach (BitmapImage item in images)
-                    {
-                        Image image = new Image();
-                        image.Height = height;
-                        image.Width = width;
-                        image.Source = item;
-
-                        // TranslateTransform                      
-                        TranslateTransform tf = new TranslateTransform();
-                        tf.X = 0;
-                        tf.Y = 0;
-                        wbFinal.Render(image, tf);
-
-                        // tempHeight += item.PixelHeight;
-                    }
-
-                    wbFinal.Invalidate();
-                    wbFinal.SaveJpeg(mem, width, height, 0, 100);
-                    mem.Seek(0, System.IO.SeekOrigin.Begin);
-
-                    // Show image. 
-                    Deployment.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        ubranieIMG.Source = wbFinal;
-                    });
-                }
-
-            });
-
-
-        }
+        //OBRABIANIE ASTRONOMII, POGODY GODZINOWEJ I NA NASTĘPNE DNI
+        #region OBRABIANIE ASTRONOMII, POGODY GODZINOWEJ I NA NASTĘPNE DNI
 
         private static void obrabianieAstronomy(XDocument doc)
         {
@@ -815,22 +673,158 @@ namespace PogodynkaWP8._0ver1
                 });
             }
         }
+        #endregion  OBRABIANIE ASTRONOMII, POGODY GODZINOWEJ I NA NASTĘPNE DNI
+
+        //UBRANIA
+        #region UBRANIA
+        public void pogodaDlaUbran()
+        {
+            string pogodaZaGodzine = "";
+            for (int i = 0; i < 2; i++)
+            {
+                pogodaZaGodzine=dni2.ElementAt(i).fcttextMetric;
+                var s=pogodaZaGodzine.Split('.');
+                string zapowiedz = s[0];
+
+                if ((zapowiedz.Equals("Możliwy deszcz"))||(zapowiedz.Equals("Możliwe burze")))
+                    czyBedziePadac=true;
+            }
+            if ((pog.Equals("deszcz"))||(pog.Equals("lekki deszcz"))||(pog.Equals("lekkie przelotne deszcze"))||(pog.Equals("mżawka"))||(czyBedziePadac))
+                ubrania.Add("parasolka_k.png");
+
+            int temp=0, t=0; ;
+            if (int.TryParse(temperatura, out t))
+                temp = t;
+
+            if (temp<2)
+            {
+                ubrania.Add("buty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("kurtka_k.png");
+                ubrania.Add("czapka_k.png");
+            }
+            else if (temp<10)
+            {
+                ubrania.Add("buty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("kurtka_k.png"); //tu dałabym cieplejszą kurtkę
+            }
+            else if (temp<18)
+            {
+                ubrania.Add("buty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("kurtka_k.png"); //lżejsza kurtka bądź płaszczyk
+            }
+            else if (temp<23)
+            {
+                ubrania.Add("buty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("dlrekaw.png");
+            }
+            else if (temp<28)
+            {
+                ubrania.Add("sandalki_k.png");
+                ubrania.Add("spodniekr_k.png");
+                ubrania.Add("tshirt_k.png");
+            }
+            else
+            {
+                ubrania.Add("sandalki_k.png");
+                ubrania.Add("spodniekr_k.png");
+                ubrania.Add("podkoszulek_k.png");
+            }
 
 
+        }
 
+        public void ubranie()
+        {
 
+            pogodaDlaUbran();
+            //ubrania.Add("spodniedl_k.png");
+            //ubrania.Add("bluza_k.png");
+            //ubrania.Add("buty_k.png");
 
+            //string[] files = new string[] { "bluza_k.png", "buty_k.png", "czapka_k.png", "dlspodnie_k.png" };
 
+            List<BitmapImage> images = new List<BitmapImage>();
+            int width = 0; // Final width.
+            int height = 0; // Final height.
+            Debug.WriteLine("TUTAJ, w ubraniu na początku");
+            Dispatcher.BeginInvoke(() =>
+            {
+                WriteableBitmap wb = null;
+                try
+                {
+                    foreach (string image in ubrania)
+                    {
+                        // Create a Bitmap from the file and add it to the list    
 
+                        BitmapImage img = new BitmapImage(new Uri("Ubrania/"+image, UriKind.RelativeOrAbsolute));
 
+                        StreamResourceInfo r = System.Windows.Application.GetResourceStream(new Uri("Ubrania/"+image, UriKind.RelativeOrAbsolute));
+                        img.SetSource(r.Stream);
+                        wb = new WriteableBitmap(img);
+                        //Update the size of the final bitmap
+                        width = wb.PixelWidth > width ? wb.PixelWidth : width;
+                        height = wb.PixelHeight > height ? wb.PixelHeight : height;
 
+                        images.Add(img);
 
+                    }
+                }
+                catch (Exception poooo)
+                {
+                    Debug.WriteLine(poooo.Message);
+                }
+                // Create a bitmap to hold the combined image 
+                BitmapImage finalImage = new BitmapImage();
 
+                StreamResourceInfo sri = System.Windows.Application.GetResourceStream(new Uri("Ubrania/kobieta.png",
+                    UriKind.RelativeOrAbsolute));
+                finalImage.SetSource(sri.Stream);
+                wbFinal= new WriteableBitmap(finalImage);
 
+                width=finalImage.PixelWidth;
+                height=finalImage.PixelHeight;
 
+                using (MemoryStream mem = new MemoryStream())
+                {
 
+                    foreach (BitmapImage item in images)
+                    {
+                        Image image = new Image();
+                        image.Height = height;
+                        image.Width = width;
+                        image.Source = item;
+
+                        // TranslateTransform                      
+                        TranslateTransform tf = new TranslateTransform();
+                        tf.X = 0;
+                        tf.Y = 0;
+                        wbFinal.Render(image, tf);
+
+                        // tempHeight += item.PixelHeight;
+                    }
+
+                    wbFinal.Invalidate();
+                    wbFinal.SaveJpeg(mem, width, height, 0, 100);
+                    mem.Seek(0, System.IO.SeekOrigin.Begin);
+
+                    // Show image. 
+                    Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                        ubranieIMG.Source = wbFinal;
+                    });
+                }
+
+            });
+            
+        }
+        #endregion UBRANIA
 
         // SPORTY
+        #region SPORTY
         public void sportyLB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // throw new NotImplementedException();
@@ -1062,6 +1056,10 @@ namespace PogodynkaWP8._0ver1
             // polowanie jednak nie
             listArray.Add("Lot balonem");
         }
+
+        #endregion SPORTY
+
+
 
     }
 }
