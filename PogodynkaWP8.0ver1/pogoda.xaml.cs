@@ -24,6 +24,9 @@ namespace PogodynkaWP8._0ver1
     public partial class Pogoda : PhoneApplicationPage
     {
         #region ZMIENNE
+        public bool czyBylaJuzUzywana=false;
+        IsolatedStorageSettings ustawienia = IsolatedStorageSettings.ApplicationSettings;
+
         public string miasto;
         public static string mess; //potrzebne do linka
         public bool czyToGPS;
@@ -53,37 +56,52 @@ namespace PogodynkaWP8._0ver1
         public Pogoda()
         {
             InitializeComponent();
+            InicjowanieUstawien();
+        }
+
+        private void InicjowanieUstawien()
+        {
+            if (ustawienia.Contains("czyJuzDzialala"))
+            {
+                czyBylaJuzUzywana = (bool)ustawienia["czyJuzDzialala"];
+            }
+            else ustawienia.Add("czyJuzDzialala", true);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            string msg;
-            if (NavigationContext.QueryString.TryGetValue("msg", out msg))
+            if (!(czyBylaJuzUzywana))
             {
+                czyBylaJuzUzywana=true;
+                Debug.WriteLine("Pierwsze użycie");
+                string msg;
+                if (NavigationContext.QueryString.TryGetValue("msg", out msg))
+                {
 
-                if (msg.Contains(","))
-                {
-                    mess=msg;
-                    var cos = mess.Split(',');
-                    if (cos.Length==4)
+                    if (msg.Contains(","))
                     {
-                        mess=cos[0]+"."+cos[1]+","+cos[2]+"."+cos[3];
+                        mess=msg;
+                        var cos = mess.Split(',');
+                        if (cos.Length==4)
+                        {
+                            mess=cos[0]+"."+cos[1]+","+cos[2]+"."+cos[3];
+                        }
+                        this.miasto="GPS: "+msg;
+                        Debug.WriteLine("GPS");
+                        czyToGPS=true;
                     }
-                    this.miasto="GPS: "+msg;
-                    Debug.WriteLine("GPS");
-                    czyToGPS=true;
+                    else
+                    {
+                        this.miasto=msg;
+                        mess="Poland/"+msg;
+                        Debug.WriteLine("MIASTO");
+                        czyToGPS=false;
+                    }
+                    this.miastoTB.Text=miasto;
+                    Thread t = new Thread(NewThread);
+                    t.Start();
                 }
-                else
-                {
-                    this.miasto=msg;
-                    mess="Poland/"+msg;
-                    Debug.WriteLine("MIASTO");
-                    czyToGPS=false;
-                }
-                this.miastoTB.Text=miasto;
-                Thread t = new Thread(NewThread);
-                t.Start();
             }
         }
 
@@ -143,6 +161,7 @@ namespace PogodynkaWP8._0ver1
             }
         }
 
+        //WYPOCZYNEK
         #region WYPOCZYNEK
         public void wyborWypoczynku()
         {
@@ -250,8 +269,10 @@ namespace PogodynkaWP8._0ver1
         {
             if ((poraDnia.Equals('p'))||(poraDnia.Equals('o'))||(poraDnia.Equals('w')))
             {
-                listaAktywnosci.Add("Kino");
+                listaAktywnosci.Add("Pub");
                 listaAktywnosci.Add("Kawiarnia");
+                listaAktywnosci.Add("Restauracja");
+                listaAktywnosci.Add("Kino");
                 listaAktywnosci.Add("Kręgle");
                 listaAktywnosci.Add("Muzeum");
                 listaAktywnosci.Add("Biblioteka");
@@ -288,12 +309,55 @@ namespace PogodynkaWP8._0ver1
             listaAktywnosci.Add("Spacer z psem");
             listaAktywnosci.Add("Fotografowanie");
             listaAktywnosci.Add("Rysowanie");
-            listaAktywnosci.Add("Gra na gitarze");
         }
 
         void wypoczynekLB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //throw new NotImplementedException();
+            string query="";
+            var nazwaAktywnosci= (sender as ListBox).SelectedItem as String;
+            if ((nazwaAktywnosci.Equals("Spacer")) ||(nazwaAktywnosci.Equals("Spacer z psem")) || (nazwaAktywnosci.Equals("Fotografowanie"))) { query="Park"; }
+            else if ((nazwaAktywnosci.Equals("Impreza"))||(nazwaAktywnosci.Equals("Randka w ciemno")))
+            {
+                query="Club";
+            }
+            else if (nazwaAktywnosci.Equals("Zakupy"))
+            {
+                query="\"Centrum handlowe\"";
+            }
+            else if ((nazwaAktywnosci.Equals("Zajęcia plastyczne"))||(nazwaAktywnosci.Equals("Zajęcia muzyczne")))
+            {
+                query="\"Dom kultury\"";
+            }
+            else if (nazwaAktywnosci.Equals("Koncert"))
+            {
+                var wbt2 = new WebBrowserTask();
+                wbt2.Uri=new Uri("https://www.google.pl/#q="+miasto+"+Koncerty", UriKind.RelativeOrAbsolute);
+                wbt2.Show();
+                query="";
+            }
+            else if (nazwaAktywnosci.Equals("Spotkanie z przyjaciółmi"))
+            {
+                query=""; //?
+            }
+            else if ((nazwaAktywnosci.Equals("Podziwiaj chmury / niebo "))||
+                (nazwaAktywnosci.Equals("Podziwiaj gwiazdy"))||
+                (nazwaAktywnosci.Equals("Podziwiaj zachód słońca"))||
+                (nazwaAktywnosci.Equals("Podziwiaj wschód słońca")))
+            {
+                query="";
+            }
+            else
+            {
+                query="\""+nazwaAktywnosci+"\"";
+            }
+            Debug.WriteLine("Działa to to?                 "+ nazwaAktywnosci+"/"+query);
+            if (!(query.Equals("")))
+            {
+                var wbt = new WebBrowserTask();
+                Uri uri = new Uri("https://maps.google.pl/maps?q=" + miasto + "+" + query, UriKind.RelativeOrAbsolute);
+                wbt.Uri=uri;
+                wbt.Show();
+            }
         }
 
         #endregion WYPOCZYNEK
