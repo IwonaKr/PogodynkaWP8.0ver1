@@ -25,7 +25,7 @@ namespace PogodynkaWP8._0ver1
     {
         #region ZMIENNE
         public bool czyBylaJuzUzywana=false;
-        public IsolatedStorageSettings ustawienia = IsolatedStorageSettings.ApplicationSettings;
+        //public IsolatedStorageSettings ustawienia = IsolatedStorageSettings.ApplicationSettings;
 
         public string miasto;
         public static string mess; //potrzebne do linka
@@ -916,8 +916,13 @@ namespace PogodynkaWP8._0ver1
             int temp=0, t=0; ;
             if (int.TryParse(temperatura, out t))
                 temp = t;
-
-            if (temp<2)
+            if (temp<-5)
+            {
+                ubrania.Add("ciezkiebuty_k.png");
+                ubrania.Add("spodniedl_k.png");
+                ubrania.Add("kurtka_zimowa_czapka_k.png");
+            }
+            else if (temp<2)
             {
                 ubrania.Add("buty_k.png");
                 ubrania.Add("spodniedl_k.png");

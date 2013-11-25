@@ -194,12 +194,6 @@
     <Resource Include="Logo\wundergroundLogo_black_horz.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Logo\wundergroundLogo_blue.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Logo\wundergroundLogo_blue_horz.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="Logo\wundergroundLogo_white.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
@@ -214,6 +208,7 @@
     <Content Include="Ubrania\dlspodnie_k.png" />
     <Content Include="Ubrania\kobieta.png" />
     <Content Include="Ubrania\kurtka_k.png" />
+    <Content Include="Ubrania\kurtka_zimowa_czapka_k.png" />
     <Content Include="Ubrania\parasolka_k.png" />
     <Content Include="Ubrania\podkoszulek_k.png" />
     <Content Include="Ubrania\sandalki_k.png" />
