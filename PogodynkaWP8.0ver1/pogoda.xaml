@@ -55,6 +55,7 @@
 
             <!-- Sporty dla aktualnej pogody-->
             <phone:PivotItem Header="sport">
+                <StackPanel x:Name="sportySP">
                     <ListBox x:Name="sportyLB"  FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -62,6 +63,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+                </StackPanel>
             </phone:PivotItem>
             
             <phone:PivotItem Header="wypoczynek">

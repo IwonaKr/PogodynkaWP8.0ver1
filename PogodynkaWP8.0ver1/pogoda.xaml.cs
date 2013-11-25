@@ -34,7 +34,7 @@ namespace PogodynkaWP8._0ver1
         public static List<ForecastDay> SFDay = new List<ForecastDay>(); //SimpleForecast
         public static List<HourlyForecast> HourlyForecast = new List<HourlyForecast>();
         public static ObservableCollection<String> listaSportow = new ObservableCollection<string>(); //lista ze sportami
-        public static ObservableCollection<String> listaAktywnosci; //lista dla wypoczynku
+        public static ObservableCollection<String> listaAktywnosci = new ObservableCollection<string>();
         public static Astronomy astronomy;
 
         //do sportów i wypoczynku
@@ -59,18 +59,14 @@ namespace PogodynkaWP8._0ver1
         }
 
 
-
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+            string msg;
             if (!(czyBylaJuzUzywana))
             {
-                czyBylaJuzUzywana=true;
-                Debug.WriteLine("Pierwsze użycie");
-                string msg;
                 if (NavigationContext.QueryString.TryGetValue("msg", out msg))
                 {
-
                     if (msg.Contains(","))
                     {
                         mess=msg;
@@ -91,22 +87,12 @@ namespace PogodynkaWP8._0ver1
                         czyToGPS=false;
                     }
                     this.miastoTB.Text=miasto;
-                    if (ustawienia.Contains("miasto"))
-                    {
-                        if (ustawienia["miasto"].Equals(miasto))
-                        {
-                            //to samo miasto było ostatnio
-                        }
 
-                    }
-                    else
-                    {
-                        ustawienia.Add("miasto", miasto);
-                    }
                     Thread t = new Thread(NewThread);
                     t.Start();
                 }
-            } listaAktywnosci = new ObservableCollection<string>();
+                czyBylaJuzUzywana=true;
+            }
         }
 
         public void NewThread()
@@ -148,6 +134,7 @@ namespace PogodynkaWP8._0ver1
 
                 this.sportyLB.ItemsSource=listaSportow;
                 this.sportyLB.SelectionChanged+=sportyLB_SelectionChanged;
+                
                 this.wypoczynekLB.ItemsSource=listaAktywnosci;
                 this.wypoczynekLB.SelectionChanged+=wypoczynekLB_SelectionChanged;
             });
@@ -319,49 +306,54 @@ namespace PogodynkaWP8._0ver1
         public void wypoczynekLB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             string query="";
+
             var nazwaAktywnosci= (sender as ListBox).SelectedItem as String;
-            if ((nazwaAktywnosci.Equals("Spacer")) ||(nazwaAktywnosci.Equals("Spacer z psem")) || (nazwaAktywnosci.Equals("Fotografowanie"))) { query="Park"; }
-            else if ((nazwaAktywnosci.Equals("Impreza"))||(nazwaAktywnosci.Equals("Randka w ciemno")))
+            if (!(nazwaAktywnosci.Equals(null)))
             {
-                query="Club";
-            }
-            else if (nazwaAktywnosci.Equals("Zakupy"))
-            {
-                query="\"Centrum handlowe\"";
-            }
-            else if ((nazwaAktywnosci.Equals("Zajęcia plastyczne"))||(nazwaAktywnosci.Equals("Zajęcia muzyczne")))
-            {
-                query="\"Dom kultury\"";
-            }
-            else if (nazwaAktywnosci.Equals("Koncert"))
-            {
-                var wbt2 = new WebBrowserTask();
-                wbt2.Uri=new Uri("https://www.google.pl/#q="+miasto+"+Koncerty", UriKind.RelativeOrAbsolute);
-                wbt2.Show();
-                query="";
-            }
-            else if (nazwaAktywnosci.Equals("Spotkanie z przyjaciółmi"))
-            {
-                query=""; //?
-            }
-            else if ((nazwaAktywnosci.Equals("Podziwiaj chmury / niebo "))||
+                if ((nazwaAktywnosci.Equals("Spacer")) ||(nazwaAktywnosci.Equals("Spacer z psem")) || (nazwaAktywnosci.Equals("Fotografowanie"))) { query="Park"; }
+                else if ((nazwaAktywnosci.Equals("Impreza"))||(nazwaAktywnosci.Equals("Randka w ciemno")))
+                {
+                    query="Club";
+                }
+                else if (nazwaAktywnosci.Equals("Zakupy"))
+                {
+                    query="\"Centrum handlowe\"";
+                }
+                else if ((nazwaAktywnosci.Equals("Zajęcia plastyczne"))||(nazwaAktywnosci.Equals("Zajęcia muzyczne")))
+                {
+                    query="\"Dom kultury\"";
+                }
+                else if (nazwaAktywnosci.Equals("Koncert"))
+                {
+                    var wbt2 = new WebBrowserTask();
+                    wbt2.Uri=new Uri("https://www.google.pl/#q="+miasto+"+Koncerty", UriKind.RelativeOrAbsolute);
+                    wbt2.Show();
+                    query="";
+                }
+                else if (nazwaAktywnosci.Equals("Spotkanie z przyjaciółmi"))
+                {
+                    query=""; //?
+                }
+                else if ((nazwaAktywnosci.Equals("Podziwiaj chmury / niebo "))||
                 (nazwaAktywnosci.Equals("Podziwiaj gwiazdy"))||
                 (nazwaAktywnosci.Equals("Podziwiaj zachód słońca"))||
                 (nazwaAktywnosci.Equals("Podziwiaj wschód słońca")))
-            {
-                query="";
-            }
-            else
-            {
-                query="\""+nazwaAktywnosci+"\"";
-            }
-            Debug.WriteLine("Działa to to?                 "+ nazwaAktywnosci+"/"+query);
-            if (!(query.Equals("")))
-            {
-                var wbt = new WebBrowserTask();
-                Uri uri = new Uri("https://maps.google.pl/maps?q=" + miasto + "+" + query, UriKind.RelativeOrAbsolute);
-                wbt.Uri=uri;
-                wbt.Show();
+                {
+                    query="";
+                }
+                else
+                {
+                    query="\""+nazwaAktywnosci+"\"";
+                }
+                Debug.WriteLine("Działa to to?                 "+ nazwaAktywnosci+"/"+query);
+                if (!(query.Equals("")))
+                {
+                    var wbt = new WebBrowserTask();
+                    Uri uri = new Uri("https://maps.google.pl/maps?q=" + miasto + "+" + query, UriKind.RelativeOrAbsolute);
+                    wbt.Uri=uri;
+                    wbt.Show();
+                }
+                
             }
         }
 
@@ -1089,6 +1081,7 @@ namespace PogodynkaWP8._0ver1
                 var wbt = new WebBrowserTask();
                 Uri uri = new Uri("https://maps.google.pl/maps?q=" + miasto + "+" + query, UriKind.RelativeOrAbsolute);
                 wbt.Uri=uri;
+                //sportyLB.SelectedItem=null;
                 wbt.Show();
             }
         }
