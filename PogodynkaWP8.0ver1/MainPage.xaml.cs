@@ -58,7 +58,7 @@ namespace PogodynkaWP8._0ver1
                 }
                 else
                 {
-                    MessageBox.Show("Nie ma lokacji", "Buu", MessageBoxButton.OK);
+                    MessageBox.Show("Lokacja nie została jeszcze odnaleziona", "Brak lokacji", MessageBoxButton.OK);
                 }
             }
             else
@@ -96,16 +96,6 @@ namespace PogodynkaWP8._0ver1
                     haveLocation=false;
                 }
             }
-            //if (currentLocation==null)
-            //{
-            //    Debug.WriteLine("current location jest nullem :C");
-            //}
-            //else if (haveLocation)
-            //{
-            //    Debug.WriteLine(currentLocation.Latitude.ToString()+" "+currentLocation.Longitude.ToString());
-            //    this.miasto=currentLocation.Latitude.ToString("0.0000")+","+currentLocation.Longitude.ToString("0.0000");
-            //    this.GPSTB.Text=currentLocation.Latitude.ToString("0.0000")+" "+currentLocation.Longitude.ToString("0.0000");
-            //}
         }
 
         private void ApplicationBarIconButton_Click(object sender, EventArgs e)
@@ -136,6 +126,12 @@ namespace PogodynkaWP8._0ver1
                 if (this.GPSorWybor)
                     this.GPSorWybor=false;
             }
+        }
+
+        private void ApplicationBar_About_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/About.xaml", UriKind.RelativeOrAbsolute));
+
         }
 
         //private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

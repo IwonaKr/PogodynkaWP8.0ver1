@@ -17,6 +17,7 @@
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
             <shell:ApplicationBarIconButton IconUri="/Images/GPS.png" Text="gps" Click="ApplicationBarIconButton_Click" x:Name="GPSappBtn"/>
             <shell:ApplicationBarIconButton IconUri="/Images/Write.png" Text="miasto" Click="ApplicationBarIconButton_Click" x:Name="MiastoAppBtn"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/About.png" Text="o nas" Click="ApplicationBar_About_Click"/>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
 
@@ -55,8 +56,8 @@
             <TextBlock x:Name="GPSTB" Foreground="{StaticResource PhoneSubtleBrush}" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilyLight}" Visibility="Collapsed" />
             <Button x:Name="OKbtn" Content="dalej" Visibility="Collapsed" Click="OKbtn_Click"/>
         </StackPanel>
-        
-        
+
+
         <!--Uncomment to see an alignment grid to help ensure your controls are
             aligned on common boundaries.  The image has a top margin of -32px to
             account for the System Tray. Set this to 0 (or remove the margin altogether)

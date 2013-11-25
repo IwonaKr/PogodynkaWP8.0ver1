@@ -134,7 +134,7 @@ namespace PogodynkaWP8._0ver1
 
                 this.sportyLB.ItemsSource=listaSportow;
                 this.sportyLB.SelectionChanged+=sportyLB_SelectionChanged;
-                
+
                 this.wypoczynekLB.ItemsSource=listaAktywnosci;
                 this.wypoczynekLB.SelectionChanged+=wypoczynekLB_SelectionChanged;
             });
@@ -353,7 +353,7 @@ namespace PogodynkaWP8._0ver1
                     wbt.Uri=uri;
                     wbt.Show();
                 }
-                
+
             }
         }
 
@@ -1313,6 +1313,12 @@ namespace PogodynkaWP8._0ver1
         }
 
         #endregion SPORTY
+
+        private void ApplicationBar_About_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/About.xaml", UriKind.RelativeOrAbsolute));
+
+        }
 
 
 

@@ -13,13 +13,19 @@
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="True">
 
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+             <shell:ApplicationBarIconButton IconUri="/Images/About.png" Text="o nas" Click="ApplicationBar_About_Click"/>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
         <phone:Pivot Title="POGODYNKA">
             <!--Aktualna pogoda-->
             <phone:PivotItem Header="pogoda">
-                <ScrollViewer x:Name="scrollViewer">
+                <ScrollViewer x:Name="scrollViewer" Margin="{StaticResource PhoneMargin}">
                     <StackPanel x:Name="glownyStackPanel">
                         <TextBlock x:Name="miastoTB" Text="{Binding miasto}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="12,12,12,12"   FontSize="{StaticResource PhoneFontSizeExtraLarge}" />
                         <TextBlock x:Name="oDniu" Text="" Margin="{StaticResource PhoneMargin}" FontSize="{StaticResource PhoneFontSizeMedium}" TextWrapping="Wrap" Visibility="Collapsed"/>
@@ -32,7 +38,7 @@
             <!--Pogoda na kolejne godziny-->
             <phone:PivotItem Header="godzinowa">
                 <ScrollViewer>
-                    <StackPanel x:Name="hStackPanel">
+                    <StackPanel x:Name="hStackPanel" Margin="{StaticResource PhoneMargin}">
 
                     </StackPanel>
                 </ScrollViewer>
@@ -55,7 +61,7 @@
 
             <!-- Sporty dla aktualnej pogody-->
             <phone:PivotItem Header="sport">
-                <StackPanel x:Name="sportySP">
+                <StackPanel x:Name="sportySP" Margin="{StaticResource PhoneMargin}">
                     <ListBox x:Name="sportyLB"  FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -67,7 +73,7 @@
             </phone:PivotItem>
             
             <phone:PivotItem Header="wypoczynek">
-                <ListBox x:Name="wypoczynekLB" FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" >
+                <ListBox x:Name="wypoczynekLB" FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="{StaticResource PhoneMargin}" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeLarge}"/>
