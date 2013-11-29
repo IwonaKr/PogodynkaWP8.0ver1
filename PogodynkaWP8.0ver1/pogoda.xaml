@@ -15,7 +15,7 @@
 
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-             <shell:ApplicationBarIconButton IconUri="/Images/About.png" Text="o nas" Click="ApplicationBar_About_Click"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/About.png" Text="o nas" Click="ApplicationBar_About_Click"/>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
 
@@ -29,8 +29,8 @@
                     <StackPanel x:Name="glownyStackPanel">
                         <TextBlock x:Name="miastoTB" Text="{Binding miasto}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="12,12,12,12"   FontSize="{StaticResource PhoneFontSizeExtraLarge}" />
                         <TextBlock x:Name="oDniu" Text="" Margin="{StaticResource PhoneMargin}" FontSize="{StaticResource PhoneFontSizeMedium}" TextWrapping="Wrap" Visibility="Collapsed"/>
-                        <TextBlock x:Name="textBox1" Text="       Proszę czekać, pobieram dane pogodowe" Margin="{StaticResource PhoneMargin}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeNormal}" TextWrapping="Wrap" />                        
                         <Image x:Name="ikonka" Source="/Icons/wait.png" Margin="{StaticResource PhoneMargin}" />
+                        <TextBlock x:Name="textBox1" Text="       Proszę czekać, pobieram dane pogodowe" Margin="{StaticResource PhoneMargin}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeNormal}" TextWrapping="Wrap" />
                     </StackPanel>
                 </ScrollViewer>
             </phone:PivotItem>
@@ -51,27 +51,19 @@
                 </ScrollViewer>
             </phone:PivotItem>
 
-            <!--Ubranie-->
-            <phone:PivotItem Header="ubranie">
-                <ScrollViewer>
-                    <Image x:Name="ubranieIMG" Source="Clothes/kobieta.png"/>
-
-                </ScrollViewer>
-            </phone:PivotItem>
-
             <!-- Sporty dla aktualnej pogody-->
             <phone:PivotItem Header="sport">
                 <!--<StackPanel x:Name="sportySP" Margin="{StaticResource PhoneMargin}">-->
-                    <ListBox x:Name="sportyLB"  FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeLarge}"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                <ListBox x:Name="sportyLB"  FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
                 <!--</StackPanel>-->
             </phone:PivotItem>
-            
+
             <phone:PivotItem Header="wypoczynek">
                 <ListBox x:Name="wypoczynekLB" FontSize="{StaticResource PhoneFontSizeLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="{StaticResource PhoneMargin}" >
                     <ListBox.ItemTemplate>
@@ -81,8 +73,17 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </phone:PivotItem>
-            
-            
+
+
+            <!--Ubranie-->
+            <phone:PivotItem Header="ubranie">
+                <ScrollViewer>
+                    <Image x:Name="ubranieIMG" Source="Clothes/kobieta.png"/>
+
+                </ScrollViewer>
+            </phone:PivotItem>
+
+
         </phone:Pivot>
     </Grid>
 

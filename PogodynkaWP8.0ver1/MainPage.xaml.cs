@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
+using Microsoft.Phone.Net.NetworkInformation;
 using Microsoft.Phone.Shell;
 using PogodynkaWP8._0ver1.Resources;
 using Windows.Devices.Geolocation;
@@ -25,9 +26,9 @@ namespace PogodynkaWP8._0ver1
 
         public class Sample
         {
-            public string Miasto { get; set; }   
+            public string Miasto { get; set; }
         }
-       
+
         // Constructor
         public MainPage()
         {
@@ -49,22 +50,40 @@ namespace PogodynkaWP8._0ver1
 
         private void OKbtn_Click(object sender, RoutedEventArgs e)
         {
-            if (this.GPSorWybor) //czyli wybrany GPS
+
+            bool isNetwork=NetworkInterface.GetIsNetworkAvailable();
+            if (!isNetwork)
             {
-                if (haveLocation)
+                MessageBoxResult result = MessageBox.Show("Nie wykryto połączenia z Internetem. Włączyć WiFi?", "Brak połączenia z Internetem", MessageBoxButton.OKCancel);
+                if (result.Equals(MessageBoxResult.OK))
                 {
-                    NavigationService.Navigate(new Uri("/Pogoda.xaml?msg="+this.miasto, UriKind.RelativeOrAbsolute));
-                    Debug.WriteLine(this.miasto);
+                    Launcher.LaunchUriAsync(new Uri("ms-settings-wifi:"));
                 }
                 else
                 {
-                    MessageBox.Show("Lokacja nie została jeszcze odnaleziona", "Brak lokacji", MessageBoxButton.OK);
+                    MessageBox.Show("Aplikacja nie może działać bez aktywnego połączenia z Internetem. ", "", MessageBoxButton.OK);
                 }
             }
             else
             {
-                this.miasto=this.miastoTB.Text;
-                NavigationService.Navigate(new Uri("/Pogoda.xaml?msg="+this.miasto, UriKind.RelativeOrAbsolute));
+                if (this.GPSorWybor) //czyli wybrany GPS
+                {
+                    if (haveLocation)
+                    {
+                        NavigationService.Navigate(new Uri("/Pogoda.xaml?msg="+this.miasto, UriKind.RelativeOrAbsolute));
+                        Debug.WriteLine(this.miasto);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Lokacja nie została jeszcze odnaleziona", "Brak lokacji", MessageBoxButton.OK);
+                    }
+                }
+
+                else
+                {
+                    this.miasto=this.miastoTB.Text;
+                    NavigationService.Navigate(new Uri("/Pogoda.xaml?msg="+this.miasto, UriKind.RelativeOrAbsolute));
+                }
             }
         }
 
@@ -88,8 +107,6 @@ namespace PogodynkaWP8._0ver1
             {
                 if ((uint)ex.HResult == 0x80004004)
                 {
-                    // the application does not have the right capability or the location master switch is off
-                    //statusTextBlock.Text = "location  is disabled in phone settings.";
                     MessageBoxResult result = MessageBox.Show("Usługa lokalizacji jest wyłączona. ", "GPS wyłączony", MessageBoxButton.OKCancel);
                     if (result==MessageBoxResult.OK)
                         Launcher.LaunchUriAsync(new Uri("ms-settings-location:"));
@@ -144,6 +161,6 @@ namespace PogodynkaWP8._0ver1
         //    // MessageBox.Show(data.Miasto);
         //    NavigationService.Navigate(new Uri("/Pogoda.xaml?msg="+data.Miasto, UriKind.RelativeOrAbsolute));
         //}
-        
+
     }
 }

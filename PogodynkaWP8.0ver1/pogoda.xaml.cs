@@ -110,46 +110,58 @@ namespace PogodynkaWP8._0ver1
         public void wc_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             string weather="";
-            //try
-            //{
-            weather = e.Result;
-            XmlReader reader = XmlReader.Create(new StringReader(weather));
-            XDocument doc = XDocument.Load(reader);
-
-            obrabianieAstronomy(doc);
-
-            obrabianieConditions(doc);
-
-            obrabianieHourlyForecast(doc);
-
-            wyborSportow();
-
-            ubranie();
-
-            wyborWypoczynku();
-
-            Deployment.Current.Dispatcher.BeginInvoke(() =>
+            try
             {
-                ///Wyświetlanie listy sportów i aktywności
+                weather = e.Result;
+                XmlReader reader = XmlReader.Create(new StringReader(weather));
+                XDocument doc = XDocument.Load(reader);
 
-                this.sportyLB.ItemsSource=listaSportow;
-                this.sportyLB.SelectionChanged+=sportyLB_SelectionChanged;
+                obrabianieAstronomy(doc);
 
-                this.wypoczynekLB.ItemsSource=listaAktywnosci;
-                this.wypoczynekLB.SelectionChanged+=wypoczynekLB_SelectionChanged;
-            });
+                obrabianieConditions(doc);
+
+                obrabianieHourlyForecast(doc);
+
+                wyborSportow();
+
+                ubranie();
+
+                wyborWypoczynku();
+
+                Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    ///Wyświetlanie listy sportów i aktywności
+
+                    this.sportyLB.ItemsSource=listaSportow;
+                    this.sportyLB.SelectionChanged+=sportyLB_SelectionChanged;
+
+                    this.wypoczynekLB.ItemsSource=listaAktywnosci;
+                    this.wypoczynekLB.SelectionChanged+=wypoczynekLB_SelectionChanged;
+                });
 
 
-            //}
-            //catch (Exception ex)
-            //{
-            //    Deployment.Current.Dispatcher.BeginInvoke(() =>
-            //    {
-            //        MessageBox.Show(ex.Message, "Błąd", MessageBoxButton.OK);
-            //        this.textBox1.Text=ex.Message;
-            //        this.ikonka.Source=null;
-            //    });
-            //}
+            }
+            catch (NullReferenceException nrex)
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    MessageBox.Show("Pogoda dla wprowadzonej nazwy miasta nie została znaleziona. Niestety nie wszystkie mniejsze miasta mają swoje stacje meteorologiczne, dlatego sugerujemy użycie GPS w celu zlokalizowania najbliższej stacji pogodowej.", "Błędne miasto", MessageBoxButton.OK);
+
+                    this.textBox1.Text="Pogoda dla wprowadzonej nazwy miasta nie została znaleziona. Niestety nie wszystkie mniejsze miasta mają swoje stacje meteorologiczne, dlatego sugerujemy użycie GPS w celu zlokalizowania najbliższej stacji pogodowej.";
+                    this.ikonka.Source=null;
+                });
+                Debug.WriteLine(nrex.Message);
+            }
+            catch (Exception ex)
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    MessageBox.Show(ex.Message, "Błąd", MessageBoxButton.OK);
+                    Debug.WriteLine(ex.GetType().ToString());
+                    this.textBox1.Text=ex.Message;
+                    this.ikonka.Source=null;
+                });
+            }
         }
 
         //WYPOCZYNEK
@@ -166,31 +178,21 @@ namespace PogodynkaWP8._0ver1
                 ladnaPogodaWyp(poraDnia);
             else if (pogoda2.Equals("obłoki zanikające"))
                 ladnaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("śnieg"))
+            else if (pogoda2.Contains("śnieg"))
+                deszczowaPogodaWyp(poraDnia);
+            else if (pogoda2.Contains("śnieżek"))
                 deszczowaPogodaWyp(poraDnia);
             else if (pogoda2.Equals("niewielkie zachmurzenie"))
                 ladnaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("deszcz"))
-                deszczowaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("lekki deszcz"))
+            else if (pogoda2.Contains("deszcz"))
                 deszczowaPogodaWyp(poraDnia);
             else if (pogoda2.Equals("pochmurno"))
                 ladnaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("płatki mgły"))
-                ladnaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("lekkie przelotne deszcze"))
+            else if (pogoda2.Contains("mżawka"))
                 deszczowaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("lekka mżawka"))
+            else if (pogoda2.Contains("mgła"))
                 ladnaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("zamglenia"))
-                ladnaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("mżawka"))
-                deszczowaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("mgła"))
-                ladnaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("lekka mgła"))
-                ladnaPogodaWyp(poraDnia);
-            else if (pogoda2.Equals("częściowe zamglenia"))
+            else if (pogoda2.Contains("zamglenia"))
                 ladnaPogodaWyp(poraDnia);
             else
             {
@@ -1106,34 +1108,26 @@ namespace PogodynkaWP8._0ver1
                 ladnaPogoda(poraDnia);
             else if (pogoda2.Equals("obłoki zanikające"))
                 ladnaPogoda(poraDnia);
-            else if (pogoda2.Equals("śnieg"))
+            else if (pogoda2.Contains("śnieg"))
+                deszczowaPogoda(poraDnia);
+            else if (pogoda2.Contains("śnieżek"))
                 deszczowaPogoda(poraDnia);
             else if (pogoda2.Equals("niewielkie zachmurzenie"))
                 ladnaPogoda(poraDnia);
-            else if (pogoda2.Equals("deszcz"))
-                deszczowaPogoda(poraDnia);
-            else if (pogoda2.Equals("lekki deszcz"))
+            else if (pogoda2.Contains("deszcz"))
                 deszczowaPogoda(poraDnia);
             else if (pogoda2.Equals("pochmurno"))
                 ladnaPogoda(poraDnia);
-            else if (pogoda2.Equals("płatki mgły"))
+            else if (pogoda2.Contains("mgły"))
                 ladnaPogoda(poraDnia);
-            else if (pogoda2.Equals("lekkie przelotne deszcze"))
+            else if (pogoda2.Contains("mżawka"))
                 deszczowaPogoda(poraDnia);
-            else if (pogoda2.Equals("lekka mżawka"))
+            else if (pogoda2.Contains("mgła"))
                 ladnaPogoda(poraDnia);
-            else if (pogoda2.Equals("zamglenia"))
-                ladnaPogoda(poraDnia);
-            else if (pogoda2.Equals("mżawka"))
-                deszczowaPogoda(poraDnia);
-            else if (pogoda2.Equals("mgła"))
-                ladnaPogoda(poraDnia);
-            else if (pogoda2.Equals("lekka mgła"))
-                ladnaPogoda(poraDnia);
-            else if (pogoda2.Equals("częściowe zamglenia"))
+            else if (pogoda2.Contains("zamglenia"))
                 ladnaPogoda(poraDnia);
             else
-                listaSportow.Add("Nieznany rodzaj pogody");
+                standardowe();
 
         }
 
