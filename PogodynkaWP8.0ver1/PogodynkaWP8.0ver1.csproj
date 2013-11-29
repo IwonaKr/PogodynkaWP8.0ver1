@@ -147,6 +147,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <None Include="PogodynkaWP8.0ver1_2013_11_29_16_40_19.sap" />
     <None Include="Properties\AppManifest.xml" />
     <None Include="Properties\WMAppManifest.xml">
       <SubType>Designer</SubType>

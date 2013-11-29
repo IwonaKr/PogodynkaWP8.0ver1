@@ -47,6 +47,12 @@ namespace PogodynkaWP8._0ver1
             // Sample code to localize the ApplicationBar
             //BuildLocalizedApplicationBar();
         }
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            Debug.WriteLine("MAIN: "+e.Content.ToString()+" "+e.NavigationMode+" "+e.Uri.ToString()+" "+e.GetType().ToString());
+            Debug.WriteLine("");
+        }
 
         private void OKbtn_Click(object sender, RoutedEventArgs e)
         {

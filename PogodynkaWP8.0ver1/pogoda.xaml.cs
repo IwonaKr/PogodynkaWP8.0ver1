@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.IsolatedStorage;
@@ -21,20 +22,21 @@ using Microsoft.Xna.Framework.Media;
 
 namespace PogodynkaWP8._0ver1
 {
-    public partial class Pogoda : PhoneApplicationPage
+    public partial class Pogoda : PhoneApplicationPage, INotifyPropertyChanged
     {
         #region ZMIENNE
         public bool czyBylaJuzUzywana=false;
+        public Thread t;
         //public IsolatedStorageSettings ustawienia = IsolatedStorageSettings.ApplicationSettings;
 
         public string miasto;
         public static string mess; //potrzebne do linka
         public bool czyToGPS;
-        public static List<ForecastDay> dni2= new List<ForecastDay>(); //txt_forecast
-        public static List<ForecastDay> SFDay = new List<ForecastDay>(); //SimpleForecast
-        public static List<HourlyForecast> HourlyForecast = new List<HourlyForecast>();
-        public static ObservableCollection<String> listaSportow = new ObservableCollection<string>(); //lista ze sportami
-        public static ObservableCollection<String> listaAktywnosci = new ObservableCollection<string>();
+        public static List<ForecastDay> nastepneDni2= new List<ForecastDay>(); //txt_forecast
+        public static List<ForecastDay> nastepneDni = new List<ForecastDay>(); //SimpleForecast
+        public static List<HourlyForecast> godzinowaPrognoza = new List<HourlyForecast>();
+        public static List<String> listaSportow = new List<string>(); //lista ze sportami
+        public static List<String> listaAktywnosci = new List<string>();
         public static Astronomy astronomy;
 
         //do sportów i wypoczynku
@@ -58,10 +60,27 @@ namespace PogodynkaWP8._0ver1
             InitializeComponent();
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            base.OnNavigatingFrom(e);
+            Debug.WriteLine("NAVIGATING FROM: "+e.IsCancelable.ToString()+" "+e.IsNavigationInitiator.ToString());
+            Debug.WriteLine("");
+            if (e.NavigationMode.Equals(NavigationMode.Back))
+            {
+                t.Abort();
+                czyBylaJuzUzywana=false;
+                listaAktywnosci.Clear();
+                listaSportow.Clear();
+            }
+        }
+
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+            Debug.WriteLine("NAVIGATED: "+e.NavigationMode.ToString()+" "+e.Uri.ToString());
             string msg;
             if (!(czyBylaJuzUzywana))
             {
@@ -88,7 +107,7 @@ namespace PogodynkaWP8._0ver1
                     }
                     this.miastoTB.Text=miasto;
 
-                    Thread t = new Thread(NewThread);
+                    t = new Thread(NewThread);
                     t.Start();
                 }
                 czyBylaJuzUzywana=true;
@@ -163,6 +182,12 @@ namespace PogodynkaWP8._0ver1
                 });
             }
         }
+
+        private void ApplicationBar_About_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/About.xaml", UriKind.RelativeOrAbsolute));
+        }
+
 
         //WYPOCZYNEK
         #region WYPOCZYNEK
@@ -310,7 +335,8 @@ namespace PogodynkaWP8._0ver1
             string query="";
 
             var nazwaAktywnosci= (sender as ListBox).SelectedItem as String;
-            if (!(nazwaAktywnosci.Equals(null)))
+
+            if (listaAktywnosci.Count>0)
             {
                 if ((nazwaAktywnosci.Equals("Spacer")) ||(nazwaAktywnosci.Equals("Spacer z psem")) || (nazwaAktywnosci.Equals("Fotografowanie"))) { query="Park"; }
                 else if ((nazwaAktywnosci.Equals("Impreza"))||(nazwaAktywnosci.Equals("Randka w ciemno")))
@@ -355,7 +381,6 @@ namespace PogodynkaWP8._0ver1
                     wbt.Uri=uri;
                     wbt.Show();
                 }
-
             }
         }
 
@@ -525,7 +550,7 @@ namespace PogodynkaWP8._0ver1
                         pog=hf.condition;
                     i++;
                 }
-                HourlyForecast.Add(hf);
+                godzinowaPrognoza.Add(hf);
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
                     //System.Globalization.CultureInfo ci = new System.Globalization.CultureInfo("pl-PL");
@@ -748,7 +773,7 @@ namespace PogodynkaWP8._0ver1
                                select m.Value;
                 sTmp = temeperatura.First();
                 fd.lowTempC=sTmp;
-                SFDay.Add(fd);
+                nastepneDni.Add(fd);
             }
 
             foreach (var item in forecast)
@@ -768,7 +793,7 @@ namespace PogodynkaWP8._0ver1
 
                     if (p%2==0)
                     {
-                        ForecastDay demo = SFDay.Find(df => df.period.Equals(simplePeriod.ToString()));
+                        ForecastDay demo = nastepneDni.Find(df => df.period.Equals(simplePeriod.ToString()));
                         d.avehumidity=demo.avehumidity;
                         d.avewind_degrees=demo.avewind_degrees;
                         d.avewind_dir=demo.avewind_dir;
@@ -879,10 +904,10 @@ namespace PogodynkaWP8._0ver1
                     }
 
                 }
-                dni2.Add(d);
+                nastepneDni2.Add(d);
 
             }
-            var dzien = (from d in SFDay where d.period=="1" select d).FirstOrDefault();
+            var dzien = (from d in nastepneDni where d.period=="1" select d).FirstOrDefault();
             // var dzien2 = (from d in dni2 where d.period=="0" select d).FirstOrDefault();
             if (!(dzien==null))
             {
@@ -905,7 +930,7 @@ namespace PogodynkaWP8._0ver1
             string pogodaZaGodzine = "";
             for (int i = 0; i < 2; i++)
             {
-                pogodaZaGodzine=dni2.ElementAt(i).fcttextMetric;
+                pogodaZaGodzine=nastepneDni2.ElementAt(i).fcttextMetric;
                 var s=pogodaZaGodzine.Split('.');
                 string zapowiedz = s[0];
 
@@ -924,7 +949,7 @@ namespace PogodynkaWP8._0ver1
                 ubrania.Add("spodniedl_k.png");
                 ubrania.Add("kurtka_zimowa_czapka_k.png");
             }
-            else if (temp<2)
+            else if (temp<5)
             {
                 ubrania.Add("buty_k.png");
                 ubrania.Add("spodniedl_k.png");
@@ -1312,14 +1337,6 @@ namespace PogodynkaWP8._0ver1
         }
 
         #endregion SPORTY
-
-        private void ApplicationBar_About_Click(object sender, EventArgs e)
-        {
-            NavigationService.Navigate(new Uri("/About.xaml", UriKind.RelativeOrAbsolute));
-
-        }
-
-
 
     }
 }
