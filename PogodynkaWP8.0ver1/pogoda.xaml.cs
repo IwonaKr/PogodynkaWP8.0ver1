@@ -25,18 +25,18 @@ namespace PogodynkaWP8._0ver1
     public partial class Pogoda : PhoneApplicationPage, INotifyPropertyChanged
     {
         #region ZMIENNE
-        public bool czyBylaJuzUzywana=false;
+        public bool czyBylaJuzUzywana=false; //potrzebna przy powrocie z przeglądarki 
         public Thread t;
         //public IsolatedStorageSettings ustawienia = IsolatedStorageSettings.ApplicationSettings;
 
         public string miasto;
-        public static string mess; //potrzebne do linka
-        public bool czyToGPS;
+        public static string query; //zawiera przekazane z poprzedniej strony parametry zmodyfikowane do linka
+        public bool czyToGPS; //czy lokacja jest z GPS czy jest to wpisana miejscowość
         public static List<ForecastDay> nastepneDni2= new List<ForecastDay>(); //txt_forecast
         public static List<ForecastDay> nastepneDni = new List<ForecastDay>(); //SimpleForecast
         public static List<HourlyForecast> godzinowaPrognoza = new List<HourlyForecast>();
         public static List<String> listaSportow = new List<string>(); //lista ze sportami
-        public static List<String> listaAktywnosci = new List<string>();
+        public static List<String> listaAktywnosci = new List<string>(); //lista z aktywnościami
         public static Astronomy astronomy;
 
         //do sportów i wypoczynku
@@ -50,7 +50,7 @@ namespace PogodynkaWP8._0ver1
         public char poraRoku= new char();
 
         //do ubrań
-        public WriteableBitmap wbFinal=null;
+        public WriteableBitmap wbFinalna=null;  //końcowa bitmapa - pogodynka wraz z ubraniem
         public List<string> ubrania = new List<string>(); //lista z wybranymi ubraniami
         public bool czyBedziePadac = false;
         #endregion
@@ -60,14 +60,12 @@ namespace PogodynkaWP8._0ver1
             InitializeComponent();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged; //handler do zdarzenia zmiany wartości właściwości dla list wypoczynku i sportów
 
-        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e) //następuje w momencie gdy rozpoczyna się nawigacja poza aktualną stronę 
         {
             base.OnNavigatingFrom(e);
-            Debug.WriteLine("NAVIGATING FROM: "+e.IsCancelable.ToString()+" "+e.IsNavigationInitiator.ToString());
-            Debug.WriteLine("");
-            if (e.NavigationMode.Equals(NavigationMode.Back))
+            if (e.NavigationMode.Equals(NavigationMode.Back)) //sprawdzam, czy cofam się do strony głownej (wtedy true, bo chce zmienić miasto i muszę zatrzymać wątek dla aktualnego miasta))
             {
                 t.Abort();
                 czyBylaJuzUzywana=false;
@@ -76,11 +74,9 @@ namespace PogodynkaWP8._0ver1
             }
         }
 
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e) //wywoływane w momencie gdy nastąpi nawigacja do danej strony
         {
             base.OnNavigatedTo(e);
-            Debug.WriteLine("NAVIGATED: "+e.NavigationMode.ToString()+" "+e.Uri.ToString());
             string msg;
             if (!(czyBylaJuzUzywana))
             {
@@ -88,11 +84,11 @@ namespace PogodynkaWP8._0ver1
                 {
                     if (msg.Contains(","))
                     {
-                        mess=msg;
-                        var cos = mess.Split(',');
-                        if (cos.Length==4)
+                        query=msg;
+                        var temp = query.Split(','); //długość i szerokość z GPS podawana jest z przecinkami. Niestety aby wstawić wartości do zapytania(linka) przecinki trzeba zastąpić kropkami. 
+                        if (temp.Length==4)
                         {
-                            mess=cos[0]+"."+cos[1]+","+cos[2]+"."+cos[3];
+                            query=temp[0]+"."+temp[1]+","+temp[2]+"."+temp[3];
                         }
                         this.miasto="GPS: "+msg;
                         Debug.WriteLine("GPS");
@@ -101,7 +97,7 @@ namespace PogodynkaWP8._0ver1
                     else
                     {
                         this.miasto=msg;
-                        mess="Poland/"+msg;
+                        query="Poland/"+msg;
                         Debug.WriteLine("MIASTO ");
                         czyToGPS=false;
                     }
@@ -116,11 +112,10 @@ namespace PogodynkaWP8._0ver1
 
         public void NewThread()
         {
-            string url = "http://api.wunderground.com/api/c9d15b10ff3ed303/forecast/forecast10day/hourly/conditions/astronomy/lang:PL/q/"+mess+".xml";
+            string url = "http://api.wunderground.com/api/c9d15b10ff3ed303/forecast/forecast10day/hourly/conditions/astronomy/lang:PL/q/"+query+".xml";
 
             WebClient wc = new WebClient();
-            //wc.DownloadStringCompleted += HttpsCompleted;
-            wc.DownloadStringCompleted +=wc_DownloadStringCompleted; //dodane, bez tej funkcji też działa!!
+            wc.DownloadStringCompleted +=wc_DownloadStringCompleted; //uruchamiane kiedy pobierze się cała zawartość
 
             wc.DownloadStringAsync(new Uri(url));
 
@@ -164,7 +159,7 @@ namespace PogodynkaWP8._0ver1
             {
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    MessageBox.Show("Pogoda dla wprowadzonej nazwy miasta nie została znaleziona. Niestety nie wszystkie mniejsze miasta mają swoje stacje meteorologiczne, dlatego sugerujemy użycie GPS w celu zlokalizowania najbliższej stacji pogodowej.", "Błędne miasto", MessageBoxButton.OK);
+                    MessageBox.Show("Pogoda dla wprowadzonej nazwy miejscowości nie została znaleziona. Niestety nie wszystkie mniejsze miasta mają swoje stacje meteorologiczne, dlatego sugerujemy użycie GPS w celu zlokalizowania najbliższej stacji pogodowej.", "Błędne miasto", MessageBoxButton.OK);
 
                     this.textBox1.Text="Pogoda dla wprowadzonej nazwy miasta nie została znaleziona. Niestety nie wszystkie mniejsze miasta mają swoje stacje meteorologiczne, dlatego sugerujemy użycie GPS w celu zlokalizowania najbliższej stacji pogodowej.";
                     this.ikonka.Source=null;
@@ -175,7 +170,7 @@ namespace PogodynkaWP8._0ver1
             {
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    MessageBox.Show(ex.Message, "Błąd", MessageBoxButton.OK);
+                    MessageBox.Show(ex.Message, "Nieznany błąd", MessageBoxButton.OK);
                     Debug.WriteLine(ex.GetType().ToString());
                     this.textBox1.Text=ex.Message;
                     this.ikonka.Source=null;
@@ -389,10 +384,18 @@ namespace PogodynkaWP8._0ver1
         //OBRABIANIE ASTRONOMII, POGODY GODZINOWEJ I NA NASTĘPNE DNI
         #region OBRABIANIE ASTRONOMII, POGODY GODZINOWEJ I NA NASTĘPNE DNI
 
+        public static string PierwszaLiteraWielka(string zdanie)
+        {
+            if (String.IsNullOrEmpty(zdanie))
+                return " ";
+            return zdanie.First().ToString().ToUpper() + String.Join("", zdanie.Skip(1));
+        }
+
+
         public static void obrabianieAstronomy(XDocument doc)
         {
             astronomy = new Astronomy();
-            int hTmp=0, mTmp=0, ho=0, m=0;
+            int hTmp=0, mTmp=0, hTmpDt=0, mTmpDt=0; //hTmpDt - hour temporary do DateTime
 
             var moon_phase = (from d in doc.Descendants()
                               where (d.Name.LocalName=="moon_phase")
@@ -404,20 +407,20 @@ namespace PogodynkaWP8._0ver1
                        select d).FirstOrDefault();
             if ((int.TryParse(tmp.Element("hour").Value, out hTmp))&&(int.TryParse(tmp.Element("minute").Value, out mTmp)))
             {
-                ho=hTmp;
-                m=mTmp;
-                DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, ho, m, 0);
-                astronomy.moonset=cos;
+                hTmpDt=hTmp;
+                mTmpDt=mTmp;
+                DateTime dtTmp=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hTmpDt, mTmpDt, 0);
+                astronomy.moonset=dtTmp;
             }
             tmp = (from d in moon_phase.Descendants()
                    where (d.Name.LocalName=="sunrise")
                    select d).FirstOrDefault();
             if ((int.TryParse(tmp.Element("hour").Value, out hTmp))&&(int.TryParse(tmp.Element("minute").Value, out mTmp)))
             {
-                ho=hTmp;
-                m=mTmp;
-                DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, ho, m, 0);
-                astronomy.moonrise=cos;
+                hTmpDt=hTmp;
+                mTmpDt=mTmp;
+                DateTime dtTmp=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hTmpDt, mTmpDt, 0);
+                astronomy.moonrise=dtTmp;
             }
             moon_phase = (from d in doc.Descendants()
                           where (d.Name.LocalName=="sun_phase")
@@ -427,9 +430,9 @@ namespace PogodynkaWP8._0ver1
                    select d).FirstOrDefault();
             if ((int.TryParse(tmp.Element("hour").Value, out hTmp))&&(int.TryParse(tmp.Element("minute").Value, out mTmp)))
             {
-                ho=hTmp;
-                m=mTmp;
-                DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, ho, m, 0);
+                hTmpDt=hTmp;
+                mTmpDt=mTmp;
+                DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hTmpDt, mTmpDt, 0);
                 astronomy.sunrise=cos;
             }
             tmp = (from d in moon_phase.Descendants()
@@ -437,9 +440,9 @@ namespace PogodynkaWP8._0ver1
                    select d).FirstOrDefault();
             if ((int.TryParse(tmp.Element("hour").Value, out hTmp))&&(int.TryParse(tmp.Element("minute").Value, out mTmp)))
             {
-                ho=hTmp;
-                m=mTmp;
-                DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, ho, m, 0);
+                hTmpDt=hTmp;
+                mTmpDt=mTmp;
+                DateTime cos=new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hTmpDt, mTmpDt, 0);
                 astronomy.sunset=cos;
             }
 
@@ -455,7 +458,6 @@ namespace PogodynkaWP8._0ver1
             var hourly_forecast = (from d in doc.Descendants()
                                    where (d.Name.LocalName=="hourly_forecast")
                                    select d).ToList();
-            // Debug.WriteLine("HF!! "+hourly_forecast.ToString());
 
             var hourly = (from d in hourly_forecast.Descendants()
                           where (d.Name.LocalName=="forecast")
@@ -612,6 +614,7 @@ namespace PogodynkaWP8._0ver1
                 pog=" ";
             else
                 pog=curObs.conditions; //do sportów potrzebne
+            pog=PierwszaLiteraWielka(pog);
             curObs.highTempC=current_obs.Element("temp_c").Value; //taka zwykła temperatura
             curObs.lowTempC=current_obs.Element("feelslike_c").Value; //odczuwalna
             curObs.icon=current_obs.Element("icon").Value;
@@ -799,7 +802,7 @@ namespace PogodynkaWP8._0ver1
                         d.avewind_dir=demo.avewind_dir;
                         d.avewind_kph=demo.avewind_kph;
                         d.avewind_mph=demo.avewind_mph;
-                        d.conditions=demo.conditions;
+                        d.conditions=PierwszaLiteraWielka(demo.conditions);
                         d.data2=demo.data2;
                         d.highTempC=demo.highTempC;
                         d.lowTempC=demo.lowTempC;
@@ -894,7 +897,7 @@ namespace PogodynkaWP8._0ver1
                                     break;
                             }
                             b.Dzien="";
-
+                            b.Warunki=PierwszaLiteraWielka(b.Warunki);
                             imgSrc = new BitmapImage(new Uri("Icons/"+d.icon+".png", UriKind.Relative));
 
 
@@ -1036,7 +1039,7 @@ namespace PogodynkaWP8._0ver1
                 StreamResourceInfo sri = System.Windows.Application.GetResourceStream(new Uri("Ubrania/kobieta.png",
                     UriKind.RelativeOrAbsolute));
                 finalImage.SetSource(sri.Stream);
-                wbFinal= new WriteableBitmap(finalImage);
+                wbFinalna= new WriteableBitmap(finalImage);
 
                 width=finalImage.PixelWidth;
                 height=finalImage.PixelHeight;
@@ -1055,19 +1058,19 @@ namespace PogodynkaWP8._0ver1
                         TranslateTransform tf = new TranslateTransform();
                         tf.X = 0;
                         tf.Y = 0;
-                        wbFinal.Render(image, tf);
+                        wbFinalna.Render(image, tf);
 
                         // tempHeight += item.PixelHeight;
                     }
 
-                    wbFinal.Invalidate();
-                    wbFinal.SaveJpeg(mem, width, height, 0, 100);
+                    wbFinalna.Invalidate();
+                    wbFinalna.SaveJpeg(mem, width, height, 0, 100);
                     mem.Seek(0, System.IO.SeekOrigin.Begin);
 
                     // Show image. 
                     Deployment.Current.Dispatcher.BeginInvoke(() =>
                     {
-                        ubranieIMG.Source = wbFinal;
+                        ubranieIMG.Source = wbFinalna;
                     });
                 }
 
