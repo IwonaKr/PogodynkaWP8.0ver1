@@ -55,6 +55,8 @@
             <Button x:Name="GPSbtn" Content="GPS" Visibility="Collapsed" Click="GPSbtn_Click"/>
             <TextBlock x:Name="GPSTB" Foreground="{StaticResource PhoneSubtleBrush}" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilyLight}" Visibility="Collapsed" />
             <Button x:Name="OKbtn" Content="dalej" Visibility="Collapsed" Click="OKbtn_Click"/>
+            <Image x:Name="logo"  Source="Logo/wundergroundLogo_white.png" Margin="{StaticResource PivotItemMargin}" DoubleTap="logo_DoubleTap" Tap="logo_DoubleTap" />
+
         </StackPanel>
 
 

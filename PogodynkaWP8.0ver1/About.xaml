@@ -27,8 +27,8 @@
 
         <!--ContentPanel - place additional content here-->
         <StackPanel x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <TextBlock Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut vitae ipsum eu dolor vehicula placerat. Suspendisse vitae metus nunc. Cras bibendum ligula et lectus gravida ornare. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Vestibulum accumsan risus vel justo eleifend, sed sagittis erat ultricies." TextWrapping="Wrap" Margin="{StaticResource PhoneMargin}" />
-            <Image x:Name="logo" Margin="{StaticResource PhoneMargin}" Source="Logo/wundergroundLogo_white.png" />
+            <TextBlock x:Name="oNasTB" Text="" TextWrapping="Wrap" Margin="{StaticResource PhoneMargin}" />
+            <Image x:Name="logo" Margin="{StaticResource PhoneMargin}" Source="Logo/wundergroundLogo_white.png" DoubleTap="logo_DoubleTap" Tap="logo_DoubleTap" />
         </StackPanel>
     </Grid>
 

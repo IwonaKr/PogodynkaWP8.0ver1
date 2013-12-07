@@ -6,10 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
 using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
 using PogodynkaWP8._0ver1.Resources;
 using Windows.Devices.Geolocation;
 using Windows.System;
@@ -24,34 +27,31 @@ namespace PogodynkaWP8._0ver1
         static bool haveLocation=false;
         public String miasto=null;
 
-        public class Sample
-        {
-            public string Miasto { get; set; }
-        }
-
         // Constructor
         public MainPage()
         {
             InitializeComponent();
             geolocator = new Geolocator();
-            //List<Sample> dataSource = new List<Sample>();
-            //dataSource.Add(new Sample() { Miasto="Lublin" });
-            //dataSource.Add(new Sample() { Miasto="Warszawa" });
-            //dataSource.Add(new Sample() { Miasto ="Puławy" });
-            //dataSource.Add(new Sample() { Miasto="Wrocław" });
-            //dataSource.Add(new Sample() { Miasto="Kielce" });
-            //dataSource.Add(new Sample() { Miasto="Poznań" });
-            //dataSource.Add(new Sample() { Miasto ="Kraków" });
-            //dataSource.Add(new Sample() { Miasto="Gdańsk" });
-            //this.listBox.ItemsSource=dataSource;
-            // Sample code to localize the ApplicationBar
-            //BuildLocalizedApplicationBar();
         }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
             Debug.WriteLine("MAIN: "+e.Content.ToString()+" "+e.NavigationMode+" "+e.Uri.ToString()+" "+e.GetType().ToString());
             Debug.WriteLine("");
+            Visibility darkBackgroundVisibility = 
+            (Visibility)Application.Current.Resources["PhoneDarkThemeVisibility"];
+            ImageSource imgSrc;
+            // Write the theme background value.
+            if (darkBackgroundVisibility == Visibility.Visible)
+            {
+                imgSrc=new BitmapImage(new Uri("Logo/wundergroundLogo_white.png", UriKind.Relative));
+                this.logo.Source= imgSrc;
+            }
+            else
+            {
+                imgSrc=new BitmapImage(new Uri("Logo/wundergroundLogo_black.png", UriKind.Relative));
+                this.logo.Source=imgSrc;
+            }
         }
 
         private void OKbtn_Click(object sender, RoutedEventArgs e)
@@ -87,8 +87,15 @@ namespace PogodynkaWP8._0ver1
 
                 else
                 {
-                    this.miasto=this.miastoTB.Text;
-                    NavigationService.Navigate(new Uri("/Pogoda.xaml?msg="+this.miasto, UriKind.RelativeOrAbsolute));
+                    if (this.miastoTB.Text.Length>2)
+                    {
+                        this.miasto=this.miastoTB.Text;
+                        NavigationService.Navigate(new Uri("/Pogoda.xaml?msg="+this.miasto, UriKind.RelativeOrAbsolute));
+                    }
+                    else
+                    {
+                        MessageBox.Show("Miasto nie zostało wpisane", "Brak miasta", MessageBoxButton.OK);
+                    }
                 }
             }
         }
@@ -155,6 +162,14 @@ namespace PogodynkaWP8._0ver1
         {
             NavigationService.Navigate(new Uri("/About.xaml", UriKind.RelativeOrAbsolute));
 
+        }
+
+        private void logo_DoubleTap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            var wbt = new WebBrowserTask();
+            Uri uri = new Uri("http://www.wunderground.com/?apiref=5eb71539bdb4d721", UriKind.RelativeOrAbsolute);
+            wbt.Uri=uri;
+            wbt.Show();
         }
 
         //private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

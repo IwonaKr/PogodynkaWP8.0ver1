@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -18,7 +16,6 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Tasks;
-using Microsoft.Xna.Framework.Media;
 
 namespace PogodynkaWP8._0ver1
 {
@@ -40,6 +37,7 @@ namespace PogodynkaWP8._0ver1
         public static Astronomy astronomy;
 
         //do sportów i wypoczynku
+        public double temperaturaOdczuwalna; //do przechowywania obliczonej w funkcji temperatury odczuwalnej
         public string pog="";
         public string wiatr="";
         public int godzina=0;
@@ -61,6 +59,7 @@ namespace PogodynkaWP8._0ver1
         }
 
         public event PropertyChangedEventHandler PropertyChanged; //handler do zdarzenia zmiany wartości właściwości dla list wypoczynku i sportów
+        
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e) //następuje w momencie gdy rozpoczyna się nawigacja poza aktualną stronę 
         {
@@ -136,11 +135,16 @@ namespace PogodynkaWP8._0ver1
 
                 obrabianieHourlyForecast(doc);
 
+                temperaturaOdczuwalna = obliczTemperatureOdczuwalna(temperatura, wiatr);
+                Debug.WriteLine(temperaturaOdczuwalna.ToString());
+
                 wyborSportow();
 
                 ubranie();
 
                 wyborWypoczynku();
+
+                
 
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
@@ -391,6 +395,28 @@ namespace PogodynkaWP8._0ver1
             return zdanie.First().ToString().ToUpper() + String.Join("", zdanie.Skip(1));
         }
 
+        /// <summary>
+        /// Funkcja obliczająca temperaturę odczuwalną wg wzoru 
+        /// </summary>
+        /// <param name="temp">Temperatura w st C</param>
+        /// <param name="wiatr">Wiatr w km/h</param>
+        /// <returns>Zwraca -999.999 gdy nie udało się obliczyć</returns>
+        public static double obliczTemperatureOdczuwalna(string temp, string wiatr){
+            double tempWC =0.0, V=0.0;
+            double result = 0.0;
+            if (double.TryParse(temp, out tempWC))
+            {
+                Debug.WriteLine(tempWC.ToString());
+                if (double.TryParse(wiatr, out V))
+                    Debug.WriteLine(V.ToString());
+                V=Math.Pow(V, 0.16);
+                result=13.12+(0.6215*tempWC)-(11.37*V)+(0.3965*tempWC*V);
+            }
+            else
+                result=-999.999;
+            return result;
+        }
+
 
         public static void obrabianieAstronomy(XDocument doc)
         {
@@ -601,6 +627,7 @@ namespace PogodynkaWP8._0ver1
 
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
+				//pobranie nazwy miejscowości wg GPS
                     this.miasto=disLoc.Element("full").Value;
                     this.miastoTB.Text=disLoc.Element("full").Value;
                     Debug.WriteLine(disLoc.ToString());
@@ -608,8 +635,11 @@ namespace PogodynkaWP8._0ver1
 
 
             }
+			//aktualne dane pogodowe
             ForecastDay curObs = new ForecastDay();
             curObs.conditions=current_obs.Element("weather").Value;
+			
+			//w niektórych miejscowościach nie ma aktualnej pogody
             if (curObs.conditions.Equals(null))
                 pog=" ";
             else
@@ -617,14 +647,37 @@ namespace PogodynkaWP8._0ver1
             pog=PierwszaLiteraWielka(pog);
             curObs.highTempC=current_obs.Element("temp_c").Value; //taka zwykła temperatura
             curObs.lowTempC=current_obs.Element("feelslike_c").Value; //odczuwalna
+            if (temperatura!=null)
+                Debug.WriteLine(temperatura);
+            temperatura=curObs.lowTempC;
+            Debug.WriteLine(temperatura);
             curObs.icon=current_obs.Element("icon").Value;
 
             Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
                 String cos = "";
                 cos =pog+"\nTemperatura: "+curObs.highTempC+"C     Odczuwalna: "+curObs.lowTempC+"C\n"+
-                        "Wiatr: "+current_obs.Element("wind_kph").Value+"km/h,   w porywach do: "+current_obs.Element("wind_gust_kph").Value+"km/h   "+current_obs.Element("wind_dir").Value+"\n"+
-                        "Wilgotność: "+current_obs.Element("relative_humidity").Value+
+                        "Wiatr: "+current_obs.Element("wind_kph").Value+"km/h, ";
+                wiatr=current_obs.Element("wind_kph").Value;
+                if (((current_obs.Element("wind_gust_kph").Value).Equals(0.ToString()))||((current_obs.Element("wind_gust_kph").Value).Equals((0.0).ToString()))||((current_obs.Element("wind_gust_kph").Value).Equals(null))||((current_obs.Element("wind_gust_kph").Value).Equals(""))) //podmuchy mogą być zerem albo moze ich nie być
+                    Debug.WriteLine("|"+current_obs.Element("wind_gust_kph").Value+"|");
+                else
+                    cos+=" porywy do "+current_obs.Element("wind_gust_kph").Value+"km/h  ";
+                var tmpWiatr = current_obs.Element("wind_dir").Value;
+                Debug.WriteLine(tmpWiatr);
+                if (tmpWiatr.Equals("East"))
+                    tmpWiatr="wschodni";
+                else if (tmpWiatr.Equals("West"))
+                    tmpWiatr="zachodni";
+                else if (tmpWiatr.Equals("North"))
+                    tmpWiatr="północny";
+                else if (tmpWiatr.Equals("South"))
+                    tmpWiatr="południowy";
+                else if (tmpWiatr.Equals("Variable"))
+                    tmpWiatr="zmienny";
+                cos+=tmpWiatr+"\n";
+                //,   w porywach do: "+current_obs.Element("wind_gust_kph").Value+"km/h   "+current_obs.Element("wind_dir").Value+"\n"+
+                cos+="Wilgotność: "+current_obs.Element("relative_humidity").Value+
                         "\nCiśnienie: "+current_obs.Element("pressure_mb").Value+"hPa, "+current_obs.Element("pressure_trend").Value+"\nWidoczność: ";
                 if (!(current_obs.Element("visibility_km").Value).Equals("N/A"))
                     cos+=current_obs.Element("visibility_km").Value+"km\nOpady (dzień/godz):";
@@ -956,8 +1009,9 @@ namespace PogodynkaWP8._0ver1
             {
                 ubrania.Add("buty_k.png");
                 ubrania.Add("spodniedl_k.png");
-                ubrania.Add("kurtka_k.png");
+                ubrania.Add("kurtka_rekawiczki_k.png");
                 ubrania.Add("czapka_k.png");
+
             }
             else if (temp<10)
             {

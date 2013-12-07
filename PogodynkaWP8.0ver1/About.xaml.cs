@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
 
 namespace PogodynkaWP8._0ver1
 {
@@ -28,16 +29,24 @@ namespace PogodynkaWP8._0ver1
             // Write the theme background value.
             if (darkBackgroundVisibility == Visibility.Visible)
             {
-                //textBlock1.Text = "background = dark";
                 imgSrc=new BitmapImage(new Uri("Logo/wundergroundLogo_white.png", UriKind.Relative));
                 this.logo.Source= imgSrc;
             }
             else
             {
-                //textBlock1.Text = "background = light";
                 imgSrc=new BitmapImage(new Uri("Logo/wundergroundLogo_black.png", UriKind.Relative));
                 this.logo.Source=imgSrc;
             }
+            oNasTB.Text="System wspomagania organizowania wolnego czasu dla systemów WP i Android\n";
+            oNasTB.Text+="Pogodynka ver 1.0.0\nAutorki\\dyplomantki: Anna Mazur & Iwona Krocz\nPromotor: dr inż. Piotr Kopniak";
+            oNasTB.Text+="\n\nPowstałe dzięki serwisowi pogodowemu WeatherUnderground";
+        }
+        private void logo_DoubleTap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            var wbt = new WebBrowserTask();
+            Uri uri = new Uri("http://www.wunderground.com/?apiref=5eb71539bdb4d721", UriKind.RelativeOrAbsolute);
+            wbt.Uri=uri;
+            wbt.Show();
         }
     }
 }
