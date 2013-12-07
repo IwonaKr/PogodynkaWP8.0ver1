@@ -1,8 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
-  <DefaultLanguage xmlns="" code="en-US" />
-  <App xmlns="" ProductID="{49ad6441-be9a-44ca-80b0-30fed5ce6f8b}" Title="PogodynkaWP8._0ver1" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="PogodynkaWP8._0ver1 author" Description="Sample description" Publisher="PogodynkaWP8._0ver1" PublisherID="{697473f7-3a34-488f-91c9-c5f01943a6ba}">
-    <IconPath IsRelative="true" IsResource="false">051459-glossy-black-icon-natural-wonders-sunrise1-sc1.png</IconPath>
+  <DefaultLanguage xmlns="" code="pl" />
+  <Languages xmlns="">
+    <Language code="pl" />
+    <Language code="pl-PL" />
+  </Languages>
+  <App xmlns="" ProductID="{49ad6441-be9a-44ca-80b0-30fed5ce6f8b}" Title="PogodynkaWP8._0ver1" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="PogodynkaWP8._0ver1 author" Description="Pogodynka" Publisher="PogodynkaWP8._0ver1" PublisherID="{697473f7-3a34-488f-91c9-c5f01943a6ba}">
+    <IconPath IsRelative="true" IsResource="false">Ikona1.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
       <Capability Name="ID_CAP_MEDIALIB_AUDIO" />
@@ -18,7 +22,7 @@
     <Tokens>
       <PrimaryToken TokenID="PogodynkaWP8._0ver1Token" TaskName="_default">
         <TemplateFlip>
-          <SmallImageURI IsRelative="true" IsResource="false">Assets\Tiles\FlipCycleTileSmall.png</SmallImageURI>
+          <SmallImageURI IsRelative="true" IsResource="false">Ikona1.png</SmallImageURI>
           <Count>0</Count>
           <BackgroundImageURI IsRelative="true" IsResource="false">Assets\Tiles\FlipCycleTileMedium.png</BackgroundImageURI>
           <Title>PogodynkaWP8._0ver1</Title>
@@ -37,8 +41,6 @@
     </Tokens>
     <ScreenResolutions>
       <ScreenResolution Name="ID_RESOLUTION_WVGA" />
-      <ScreenResolution Name="ID_RESOLUTION_WXGA" />
-      <ScreenResolution Name="ID_RESOLUTION_HD720P" />
     </ScreenResolutions>
   </App>
 </Deployment>

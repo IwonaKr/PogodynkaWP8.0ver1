@@ -148,6 +148,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="PogodynkaWP8.0ver1_2013_11_29_16_40_19.sap" />
+    <None Include="PogodynkaWP8.0ver1_2013_12_07_20_35_21.sap" />
+    <None Include="PogodynkaWP8.0ver1_2013_12_07_20_45_01.sap" />
+    <None Include="PogodynkaWP8.0ver1_2013_12_07_20_58_32.sap" />
     <None Include="Properties\AppManifest.xml" />
     <None Include="Properties\WMAppManifest.xml">
       <SubType>Designer</SubType>
@@ -174,6 +177,7 @@
     <Content Include="Assets\Tiles\IconicTileSmall.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Ikona1.png" />
     <Content Include="Images\About.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
