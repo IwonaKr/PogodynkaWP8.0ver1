@@ -120,9 +120,9 @@ namespace PogodynkaWP8._0ver1
             {
                 if ((uint)ex.HResult == 0x80004004)
                 {
-                    MessageBoxResult result = MessageBox.Show("Usługa lokalizacji jest wyłączona. ", "GPS wyłączony", MessageBoxButton.OKCancel);
+                    MessageBoxResult result = MessageBox.Show("Usługa lokalizacji jest wyłączona. Włączyć GPS?", "GPS wyłączony", MessageBoxButton.OKCancel);
                     if (result==MessageBoxResult.OK)
-                        Launcher.LaunchUriAsync(new Uri("ms-settings-location:"));
+                       Launcher.LaunchUriAsync(new Uri("ms-settings-location:"));
                     haveLocation=false;
                 }
             }

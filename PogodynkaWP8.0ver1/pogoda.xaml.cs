@@ -29,6 +29,7 @@ namespace PogodynkaWP8._0ver1
         public string miasto;
         public static string query; //zawiera przekazane z poprzedniej strony parametry zmodyfikowane do linka
         public bool czyToGPS; //czy lokacja jest z GPS czy jest to wpisana miejscowość
+        public static ForecastDay curObs;
         public static List<ForecastDay> nastepneDni2 = new List<ForecastDay>(); //txt_forecast
         public static List<ForecastDay> nastepneDni = new List<ForecastDay>(); //SimpleForecast
         public static List<HourlyForecast> godzinowaPrognoza = new List<HourlyForecast>();
@@ -40,6 +41,7 @@ namespace PogodynkaWP8._0ver1
         public double temperaturaOdczuwalna; //do przechowywania obliczonej w funkcji temperatury odczuwalnej
         public string pog = "";
         public string wiatr = "";
+        public string wiatrPorywy="";
         public int godzina = 0;
         public int miesiac = 0;
         public string dzienTygodnia = "";
@@ -59,6 +61,7 @@ namespace PogodynkaWP8._0ver1
         }
 
         public event PropertyChangedEventHandler PropertyChanged; //handler do zdarzenia zmiany wartości właściwości dla list wypoczynku i sportów
+
 
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e) //następuje w momencie gdy rozpoczyna się nawigacja poza aktualną stronę 
@@ -134,8 +137,12 @@ namespace PogodynkaWP8._0ver1
                 obrabianieConditions(doc);
 
                 obrabianieHourlyForecast(doc);
-
-                temperaturaOdczuwalna = obliczTemperatureOdczuwalna(temperatura, wiatr);
+                
+                temperaturaOdczuwalna = obliczTemperatureOdczuwalna(temperatura, wiatr, wiatrPorywy);
+                double tempOdcz=0.0;
+                if (double.TryParse(curObs.lowTempC, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out tempOdcz))
+                    if ((tempOdcz+2<temperaturaOdczuwalna)||(tempOdcz-2>temperaturaOdczuwalna))
+                        temperaturaOdczuwalna=tempOdcz;
                 Debug.WriteLine(temperaturaOdczuwalna.ToString());
 
                 wyborSportow();
@@ -194,7 +201,7 @@ namespace PogodynkaWP8._0ver1
         {
 
             String pogoda2 = pog.ToLower();
-         
+
             if (pogoda2.Equals("pogodnie"))
             {
                 ladnaPogodaWyp(poraDnia);
@@ -248,7 +255,7 @@ namespace PogodynkaWP8._0ver1
         private void zalezneWyp()
         {
             string pogoda2 = pog.ToLower();
-            if ((pogoda2.Equals("pogodnie")) || (pogoda2.Equals("niewielkie zachmurzenie")) || (pogoda2.Equals("obłoki zanikające")) )
+            if ((pogoda2.Equals("pogodnie")) || (pogoda2.Equals("niewielkie zachmurzenie")) || (pogoda2.Equals("obłoki zanikające")))
             {
                 TimeSpan wschod1 = new TimeSpan(astronomy.sunrise.Hour - 1, astronomy.sunrise.Minute, 0); //-1 godzina do wschodu
                 TimeSpan zachod1 = new TimeSpan(astronomy.sunset.Hour - 1, astronomy.sunset.Minute, 0); //-1 godzina do zachodu
@@ -413,21 +420,29 @@ namespace PogodynkaWP8._0ver1
         /// <param name="temp">Temperatura w st C</param>
         /// <param name="wiatr">Wiatr w km/h</param>
         /// <returns>Zwraca -999.999 gdy nie udało się obliczyć</returns>
-        public static double obliczTemperatureOdczuwalna(string temp, string wiatr)
+        public static double obliczTemperatureOdczuwalna(string temp, string wiatr, string wiatrPorywy)
         {
             double tempWC = 0.0, V = 0.0;
             double result = 0.0;
-            if (double.TryParse(temp, out tempWC))
+            if (double.TryParse(temp, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out tempWC))
             {
                 Debug.WriteLine(tempWC.ToString());
-                if (double.TryParse(wiatr, out V))
-                    Debug.WriteLine(V.ToString());
+                if (!(wiatrPorywy.Equals("")))
+                {
+                    if (double.TryParse(wiatrPorywy, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out V))
+                        Debug.WriteLine(V.ToString());
+                }
+                else
+                {
+                    if (double.TryParse(wiatr, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out V))
+                        Debug.WriteLine(V.ToString());
+                }
                 V = Math.Pow(V, 0.16);
                 result = 13.12 + (0.6215 * tempWC) - (11.37 * V) + (0.3965 * tempWC * V);
             }
             else
-                result = -999.999;
-            return result;
+                result = -999.9999;
+            return Math.Round(result, 4);//result;
         }
 
 
@@ -587,8 +602,9 @@ namespace PogodynkaWP8._0ver1
                     godzina = dt.Hour;
                     temperatura = hf.tempC;
                     //wiatr = hf.windKph;
-                    if (pog.Equals(""))
+                    if (pog.Equals(" "))
                         pog = hf.condition;
+                    Debug.WriteLine("*"+pog+"*");
                     i++;
                 }
                 godzinowaPrognoza.Add(hf);
@@ -649,7 +665,7 @@ namespace PogodynkaWP8._0ver1
 
             }
             //aktualne dane pogodowe
-            ForecastDay curObs = new ForecastDay();
+            curObs = new ForecastDay();
             curObs.conditions = current_obs.Element("weather").Value;
 
             //w niektórych miejscowościach nie ma aktualnej pogody
@@ -675,7 +691,10 @@ namespace PogodynkaWP8._0ver1
                 if (((current_obs.Element("wind_gust_kph").Value).Equals(0.ToString())) || ((current_obs.Element("wind_gust_kph").Value).Equals((0.0).ToString())) || ((current_obs.Element("wind_gust_kph").Value).Equals(null)) || ((current_obs.Element("wind_gust_kph").Value).Equals(""))) //podmuchy mogą być zerem albo moze ich nie być
                     Debug.WriteLine("|" + current_obs.Element("wind_gust_kph").Value + "|");
                 else
+                {
                     cos += " porywy do " + current_obs.Element("wind_gust_kph").Value + "km/h  ";
+                    wiatrPorywy =current_obs.Element("wind_gust_kph").Value;
+                }
                 var tmpWiatr = current_obs.Element("wind_dir").Value;
                 Debug.WriteLine(tmpWiatr);
                 if (tmpWiatr.Equals("East"))
@@ -1037,7 +1056,7 @@ namespace PogodynkaWP8._0ver1
             {
                 ubrania.Add("buty_k.png");
                 ubrania.Add("spodniedl_k.png");
-                ubrania.Add("plaszcz_k.png"); 
+                ubrania.Add("plaszcz_k.png");
             }
             else if (temperaturaOdczuwalna < 23)
             {
@@ -1065,7 +1084,7 @@ namespace PogodynkaWP8._0ver1
         {
 
             pogodaDlaUbran();
-           
+
             List<BitmapImage> images = new List<BitmapImage>();
             int width = 0; // Final width.
             int height = 0; // Final height.
@@ -1388,7 +1407,7 @@ namespace PogodynkaWP8._0ver1
             }
         }
 
-      
+
 
         #endregion SPORTY
 
