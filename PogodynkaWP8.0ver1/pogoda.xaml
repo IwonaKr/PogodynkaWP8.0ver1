@@ -22,8 +22,11 @@
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
+        <ProgressBar x:Name="postep" IsIndeterminate="True" />
+
         <phone:Pivot Title="POGODYNKA">
             <!--Aktualna pogoda-->
+            
             <phone:PivotItem Header="pogoda">
                 <ScrollViewer x:Name="scrollViewer" Margin="{StaticResource PhoneMargin}">
                     <StackPanel x:Name="glownyStackPanel">

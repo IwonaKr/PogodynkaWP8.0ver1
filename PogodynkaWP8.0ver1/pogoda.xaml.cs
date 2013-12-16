@@ -125,6 +125,7 @@ namespace PogodynkaWP8._0ver1
 
         public void wc_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
+            
             string weather = "";
             try
             {
@@ -151,10 +152,11 @@ namespace PogodynkaWP8._0ver1
 
                 wyborWypoczynku();
 
-
+                
 
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
+                    this.postep.Visibility=Visibility.Collapsed;
                     ///Wyświetlanie listy sportów i aktywności
 
                     this.sportyLB.ItemsSource = listaSportow;

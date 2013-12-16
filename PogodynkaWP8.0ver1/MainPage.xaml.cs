@@ -150,6 +150,7 @@ namespace PogodynkaWP8._0ver1
                 Debug.WriteLine("Miasto z appbaru guziczkowego");
                 this.podajMiasto.Visibility=Visibility.Visible;
                 this.miastoTB.Visibility=Visibility.Visible;
+                this.miastoTB.Focus();
                 this.wlaczGPS.Visibility=Visibility.Collapsed;
                 this.GPSbtn.Visibility=Visibility.Collapsed;
                 this.GPSTB.Visibility=Visibility.Collapsed;
