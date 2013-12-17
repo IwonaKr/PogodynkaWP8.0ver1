@@ -1036,7 +1036,7 @@ namespace PogodynkaWP8._0ver1
             //    temp = t;
             if (temperaturaOdczuwalna <= 0)
             {
-                ubrania.Add("ciezkiebuty_k.png");
+                ubrania.Add("buty_k.png");
                 ubrania.Add("spodniedl_k.png");
                 ubrania.Add("kurtka_zimowa_czapka_k.png");
             }

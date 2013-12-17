@@ -203,7 +203,6 @@
     </Resource>
     <Content Include="Ubrania\bluza_k.png" />
     <Content Include="Ubrania\buty_k.png" />
-    <Content Include="Ubrania\ciezkiebuty_k.png" />
     <Content Include="Ubrania\czapka_k.png" />
     <Content Include="Ubrania\dlrekaw_k.png" />
     <Content Include="Ubrania\dlspodnie_k.png" />
