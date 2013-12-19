@@ -51,7 +51,7 @@ namespace PogodynkaWP8._0ver1
 
         //do ubrań
         public WriteableBitmap wbFinalna = null;  //końcowa bitmapa - pogodynka wraz z ubraniem
-        public List<string> ubrania = new List<string>(); //lista z wybranymi ubraniami
+        //public List<string> ubrania = new List<string>(); //lista z wybranymi ubraniami
         public bool czyBedziePadac = false;
         #endregion
 
@@ -125,7 +125,7 @@ namespace PogodynkaWP8._0ver1
 
         public void wc_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
-            
+
             string weather = "";
             try
             {
@@ -138,12 +138,9 @@ namespace PogodynkaWP8._0ver1
                 obrabianieConditions(doc);
 
                 obrabianieHourlyForecast(doc);
-                
-                temperaturaOdczuwalna = obliczTemperatureOdczuwalna(temperatura, wiatr, wiatrPorywy);
-                double tempOdcz=0.0;
-                if (double.TryParse(curObs.lowTempC, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out tempOdcz))
-                    if ((tempOdcz+2<temperaturaOdczuwalna)||(tempOdcz-2>temperaturaOdczuwalna))
-                        temperaturaOdczuwalna=tempOdcz;
+
+                temperaturaOdczuwalna = obliczTemperatureOdczuwalna(temperatura, wiatr);
+
                 Debug.WriteLine(temperaturaOdczuwalna.ToString());
 
                 wyborSportow();
@@ -152,10 +149,11 @@ namespace PogodynkaWP8._0ver1
 
                 wyborWypoczynku();
 
-                
+
 
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
+                    //ukrycie paska postępu
                     this.postep.Visibility=Visibility.Collapsed;
                     ///Wyświetlanie listy sportów i aktywności
 
@@ -172,9 +170,10 @@ namespace PogodynkaWP8._0ver1
             {
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    MessageBox.Show("Pogoda dla wprowadzonej nazwy miejscowości nie została znaleziona. Niestety nie wszystkie mniejsze miasta mają swoje stacje meteorologiczne, dlatego sugerujemy użycie GPS w celu zlokalizowania najbliższej stacji pogodowej.", "Błędne miasto", MessageBoxButton.OK);
+                    string informacja = "Pogoda dla wprowadzonej nazwy miejscowości nie została znaleziona. Niestety nie wszystkie mniejsze miasta mają swoje stacje meteorologiczne, dlatego sugerujemy użycie GPS w celu zlokalizowania najbliższej stacji pogodowej.";
+                    MessageBox.Show(informacja, "Błędne miasto", MessageBoxButton.OK);
 
-                    this.textBox1.Text = "Pogoda dla wprowadzonej nazwy miasta nie została znaleziona. Niestety nie wszystkie mniejsze miasta mają swoje stacje meteorologiczne, dlatego sugerujemy użycie GPS w celu zlokalizowania najbliższej stacji pogodowej.";
+                    this.textBox1.Text = informacja;
                     this.ikonka.Source = null;
                 });
                 Debug.WriteLine(nrex.Message);
@@ -421,26 +420,30 @@ namespace PogodynkaWP8._0ver1
         /// </summary>
         /// <param name="temp">Temperatura w st C</param>
         /// <param name="wiatr">Wiatr w km/h</param>
-        /// <returns>Zwraca -999.999 gdy nie udało się obliczyć</returns>
-        public static double obliczTemperatureOdczuwalna(string temp, string wiatr, string wiatrPorywy)
+        /// <returns>Zwraca -999.9999 gdy nie udało się obliczyć</returns>
+        public static double obliczTemperatureOdczuwalna(string temp, string wiatr)
         {
             double tempWC = 0.0, V = 0.0;
             double result = 0.0;
-            if (double.TryParse(temp, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out tempWC))
+            //if (double.TryParse(temp, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out tempWC))
+            if(true)
             {
+                tempWC=Convert.ToDouble(temp);
                 Debug.WriteLine(tempWC.ToString());
-                if (!(wiatrPorywy.Equals("")))
+
+                if (double.TryParse(wiatr, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out V))
                 {
-                    if (double.TryParse(wiatrPorywy, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out V))
-                        Debug.WriteLine(V.ToString());
+                    Debug.WriteLine(V.ToString());
+                    if (V!=0.0)
+                    {
+                        V = Math.Pow(V, 0.16);
+                        result = 13.12 + (0.6215 * tempWC) - (11.37 * V) + (0.3965 * tempWC * V);
+                    }
+                    else
+                    {
+                        result=tempWC;
+                    }
                 }
-                else
-                {
-                    if (double.TryParse(wiatr, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out V))
-                        Debug.WriteLine(V.ToString());
-                }
-                V = Math.Pow(V, 0.16);
-                result = 13.12 + (0.6215 * tempWC) - (11.37 * V) + (0.3965 * tempWC * V);
             }
             else
                 result = -999.9999;
@@ -618,7 +621,7 @@ namespace PogodynkaWP8._0ver1
                     b.Godz = hf.czas.ToString("HH:mm");
                     b.Dzien = hf.czas.ToString("d MMM yyyy");
                     b.Warunki = hf.condition;
-                    b.opady.Text = "Opady: " + hf.qpf;
+                    b.Opady = "Opady: " + hf.qpf;
                     b.temperatura.Text = "Temp: " + hf.tempC + "C";
                     ImageSource imgSrc;
                     if (hf.czas.Hour <= astronomy.sunrise.Hour || hf.czas.Hour >= astronomy.sunset.Hour)
@@ -1015,8 +1018,9 @@ namespace PogodynkaWP8._0ver1
 
         //UBRANIA
         #region UBRANIA
-        public void pogodaDlaUbran()
+        public List<string> pogodaDlaUbran()
         {
+            List<string> ubrania = new List<string>();
             string pogodaZaGodzine = "";
             for (int i = 0; i <= 2; i++)
             {
@@ -1079,13 +1083,13 @@ namespace PogodynkaWP8._0ver1
                 ubrania.Add("podkoszulek_k.png");
             }
 
-
+            return ubrania;
         }
 
         public void ubranie()
         {
 
-            pogodaDlaUbran();
+            List<string> ubrania = pogodaDlaUbran();
 
             List<BitmapImage> images = new List<BitmapImage>();
             int width = 0; // Final width.
@@ -1104,18 +1108,18 @@ namespace PogodynkaWP8._0ver1
 
                         StreamResourceInfo r = System.Windows.Application.GetResourceStream(new Uri("Ubrania/" + image, UriKind.RelativeOrAbsolute));
                         img.SetSource(r.Stream);
-                        wb = new WriteableBitmap(img);
+                        //wb = new WriteableBitmap(img);
                         //Update the size of the final bitmap
-                        width = wb.PixelWidth > width ? wb.PixelWidth : width;
-                        height = wb.PixelHeight > height ? wb.PixelHeight : height;
+                        //width = wb.PixelWidth > width ? wb.PixelWidth : width;
+                        //height = wb.PixelHeight > height ? wb.PixelHeight : height;
 
                         images.Add(img);
 
                     }
                 }
-                catch (Exception poooo)
+                catch (Exception ex)
                 {
-                    Debug.WriteLine(poooo.Message);
+                    Debug.WriteLine(ex.Message);
                 }
                 // Create a bitmap to hold the combined image 
                 BitmapImage finalImage = new BitmapImage();
