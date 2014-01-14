@@ -1009,7 +1009,7 @@ namespace PogodynkaWP8._0ver1
                     Debug.WriteLine("dzien" + dzien.ToString());
                     TextBlock oDniu = this.oDniu;
                     oDniu.TextWrapping = TextWrapping.Wrap;
-                    oDniu.Text = "Dzisiaj jest " + dzien.data.day + " " + dzien.data.monthName + " " + dzien.data.year + ", " + dzien.data.weekDay + ". To " + dzien.data.yday + " dzień roku.";
+                    oDniu.Text = "Dzisiaj jest " + dzien.data.day + " " + dzien.data.monthName + " " + dzien.data.year + ", " + dzien.data.weekDay + ". To " + dzien.data.yday+1 + " dzień roku.";
                     oDniu.Visibility = Visibility.Visible;
                 });
             }
