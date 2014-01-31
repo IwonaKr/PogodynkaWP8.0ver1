@@ -16,6 +16,8 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Tasks;
+using Microsoft.Phone.Shell;
+using Microsoft.Phone.Scheduler;
 
 namespace PogodynkaWP8._0ver1
 {
@@ -48,6 +50,7 @@ namespace PogodynkaWP8._0ver1
         public string temperatura = "";
         public char poraDnia = new char();
         public char poraRoku = new char();
+        public FlipTileData FlipTileData = new FlipTileData();
 
         //do ubrań
         public WriteableBitmap wbFinalna = null;  //końcowa bitmapa - pogodynka wraz z ubraniem
@@ -175,6 +178,8 @@ namespace PogodynkaWP8._0ver1
 
                     this.textBox1.Text = informacja;
                     this.ikonka.Source = null;
+
+                    
                 });
                 Debug.WriteLine(nrex.Message);
             }
@@ -702,6 +707,11 @@ namespace PogodynkaWP8._0ver1
                     cos += " porywy do " + current_obs.Element("wind_gust_kph").Value + "km/h  ";
                     wiatrPorywy =current_obs.Element("wind_gust_kph").Value;
                 }
+                FlipTileData.Title = this.miasto;
+                FlipTileData.BackTitle = this.miasto;
+                FlipTileData.Count = 0;
+                FlipTileData.BackContent = pog+"\nTemperatura: \n"+curObs.highTempC + "C/" + curObs.lowTempC + "C\n";
+                FlipTileData.WideBackContent = cos;
                 var tmpWiatr = current_obs.Element("wind_dir").Value;
                 Debug.WriteLine(tmpWiatr);
                 if (tmpWiatr.Equals("East"))
@@ -738,13 +748,27 @@ namespace PogodynkaWP8._0ver1
                 {
                     Debug.WriteLine("sunrise: " + astronomy.sunrise.Hour + " " + astronomy.sunset.Hour);
                     uri = new Uri("Icons/nt_" + curObs.icon + ".png", UriKind.Relative);
+                    FlipTileData.BackBackgroundImage = uri;
+                    FlipTileData.WideBackBackgroundImage = uri;
+                    FlipTileData.BackgroundImage = uri;
+                    FlipTileData.WideBackgroundImage = uri;
+                    FlipTileData.SmallBackgroundImage = uri;
                 }
                 else
                 {
                     uri = new Uri("Icons/" + curObs.icon + ".png", UriKind.Relative);
+                    FlipTileData.BackBackgroundImage = uri;
+                    FlipTileData.WideBackBackgroundImage = uri;
+                    FlipTileData.BackgroundImage = uri;
+                    FlipTileData.WideBackgroundImage = uri;
+                    FlipTileData.SmallBackgroundImage = uri;
                 }
                 ImageSource imgSource = new BitmapImage(uri);
                 this.ikonka.Source = imgSource;
+                Debug.WriteLine(FlipTileData.Title.ToString());
+                ShellTile primaryTile = ShellTile.ActiveTiles.First();
+                
+                primaryTile.Update(FlipTileData);
 
             });
 
