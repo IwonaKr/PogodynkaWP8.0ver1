@@ -744,24 +744,29 @@ namespace PogodynkaWP8._0ver1
                 //        "\nOpady (godz/dzień): "+current_obs.Element("precip_1hr_metric").Value+"mm/"+current_obs.Element("precip_today_metric").Value+"mm";
                 this.textBox1.Text = cos;
                 Uri uri = null;
+                Uri uri2 = null;
                 if ((DateTime.Now < astronomy.sunrise) || (DateTime.Now > astronomy.sunset)) //po zachodzie słońca
                 {
                     Debug.WriteLine("sunrise: " + astronomy.sunrise.Hour + " " + astronomy.sunset.Hour);
                     uri = new Uri("Icons/nt_" + curObs.icon + ".png", UriKind.Relative);
-                    FlipTileData.BackBackgroundImage = uri;
-                    FlipTileData.WideBackBackgroundImage = uri;
-                    FlipTileData.BackgroundImage = uri;
-                    FlipTileData.WideBackgroundImage = uri;
-                    FlipTileData.SmallBackgroundImage = uri;
+                    uri2 = new Uri("Icons336/nt_" + curObs.icon + ".png", UriKind.Relative);
+                    
+                    FlipTileData.BackBackgroundImage = uri2;
+                    FlipTileData.WideBackBackgroundImage = uri2;
+                    FlipTileData.BackgroundImage = uri2;
+                    FlipTileData.WideBackgroundImage = uri2;
+                    FlipTileData.SmallBackgroundImage = uri2;
                 }
                 else
                 {
                     uri = new Uri("Icons/" + curObs.icon + ".png", UriKind.Relative);
-                    FlipTileData.BackBackgroundImage = uri;
-                    FlipTileData.WideBackBackgroundImage = uri;
-                    FlipTileData.BackgroundImage = uri;
-                    FlipTileData.WideBackgroundImage = uri;
-                    FlipTileData.SmallBackgroundImage = uri;
+                    uri2 = new Uri("Icons336/" + curObs.icon + ".png", UriKind.Relative);
+
+                    FlipTileData.BackBackgroundImage = uri2;
+                    FlipTileData.WideBackBackgroundImage = uri2;
+                    FlipTileData.BackgroundImage = uri2;
+                    FlipTileData.WideBackgroundImage = uri2;
+                    FlipTileData.SmallBackgroundImage = uri2;
                 }
                 ImageSource imgSource = new BitmapImage(uri);
                 this.ikonka.Source = imgSource;
