@@ -227,6 +227,8 @@ namespace PogodynkaWP8._0ver1
                 ladnaPogodaWyp(poraDnia);
             else if (pogoda2.Contains("zamglenia"))
                 ladnaPogodaWyp(poraDnia);
+            else
+                listaAktywnosci.Add("Zostań w domu");
 
             //listaAktywnosci.Add("Nieznany rodzaj pogody");
 
@@ -1009,7 +1011,7 @@ namespace PogodynkaWP8._0ver1
                     Debug.WriteLine("dzien" + dzien.ToString());
                     TextBlock oDniu = this.oDniu;
                     oDniu.TextWrapping = TextWrapping.Wrap;
-                    oDniu.Text = "Dzisiaj jest " + dzien.data.day + " " + dzien.data.monthName + " " + dzien.data.year + ", " + dzien.data.weekDay + ". To " + dzien.data.yday+1 + " dzień roku.";
+                    oDniu.Text = "Dzisiaj jest " + dzien.data.day + " " + dzien.data.monthName + " " + dzien.data.year + ", " + dzien.data.weekDay + ". To " + (Int16.Parse(dzien.data.yday)+1).ToString() + " dzień roku.";
                     oDniu.Visibility = Visibility.Visible;
                 });
             }
