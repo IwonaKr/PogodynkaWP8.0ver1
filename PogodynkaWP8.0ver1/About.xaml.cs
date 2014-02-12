@@ -37,8 +37,9 @@ namespace PogodynkaWP8._0ver1
                 imgSrc=new BitmapImage(new Uri("Logo/wundergroundLogo_black.png", UriKind.Relative));
                 this.logo.Source=imgSrc;
             }
-            oNasTB.Text="System wspomagania organizowania wolnego czasu dla systemów WP i Android\n";
-            oNasTB.Text+="Pogodynka ver 1.0.0\nAutorki\\dyplomantki: Anna Mazur & Iwona Krocz\nPromotor: dr inż. Piotr Kopniak";
+            //oNasTB.Text="System wspomagania organizowania wolnego czasu dla systemów WP i Android\n";
+            //oNasTB.Text+="Pogodynka ver 1.0.0\nAutorki\\dyplomantki: Anna Mazur & Iwona Krocz\nPromotor: dr inż. Piotr Kopniak";
+            oNasTB.Text += "Pogodynka 1.0.0\nAutorki: AnnaeM & IwonaKr.\n";
             oNasTB.Text+="\n\nPowstałe dzięki serwisowi pogodowemu WeatherUnderground";
         }
         private void logo_DoubleTap(object sender, System.Windows.Input.GestureEventArgs e)
