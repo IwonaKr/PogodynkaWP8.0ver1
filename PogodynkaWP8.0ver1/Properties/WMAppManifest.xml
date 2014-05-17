@@ -3,17 +3,18 @@
   <DefaultLanguage xmlns="" code="pl" />
   <Languages xmlns="">
     <Language code="pl-PL" />
+    <Language code="pl" />
   </Languages>
-  <App xmlns="" ProductID="{49ad6441-be9a-44ca-80b0-30fed5ce6f8b}" Title="PogodynkaWP8._0ver1" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="PogodynkaWP8._0ver1 author" Description="Sample description" Publisher="PogodynkaWP8._0ver1" PublisherID="{697473f7-3a34-488f-91c9-c5f01943a6ba}">
-    <IconPath IsRelative="true" IsResource="false">051459-glossy-black-icon-natural-wonders-sunrise1-sc1.png</IconPath>
+  <App xmlns="" ProductID="{49ad6441-be9a-44ca-80b0-30fed5ce6f8b}" Title="Pogodynka - Twój Asystent!" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="IwonaKr" Description="Pogoda, wypoczynek, sport i ubiór - wszystko w jednej aplikacji!" Publisher="PogodynkaWP8._0ver1" PublisherID="{697473f7-3a34-488f-91c9-c5f01943a6ba}">
+    <IconPath IsRelative="true" IsResource="false">pogodynka.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
-      <Capability Name="ID_CAP_MEDIALIB_AUDIO" />
-      <Capability Name="ID_CAP_MEDIALIB_PLAYBACK" />
       <Capability Name="ID_CAP_SENSORS" />
       <Capability Name="ID_CAP_WEBBROWSERCOMPONENT" />
       <Capability Name="ID_CAP_LOCATION" />
+      <Capability Name="ID_CAP_IDENTITY_USER" />
       <Capability Name="ID_CAP_MEDIALIB_PHOTO" />
+      <Capability Name="ID_CAP_PHONEDIALER" />
     </Capabilities>
     <Tasks>
       <DefaultTask Name="_default" NavigationPage="MainPage.xaml" />
@@ -21,22 +22,17 @@
     <Tokens>
       <PrimaryToken TokenID="PogodynkaWP8._0ver1Token" TaskName="_default">
         <TemplateFlip>
-          <SmallImageURI IsRelative="true" IsResource="false">icon1.png</SmallImageURI>
+          <SmallImageURI IsRelative="true" IsResource="false">pogodynka.png</SmallImageURI>
           <Count>0</Count>
           <BackgroundImageURI IsRelative="true" IsResource="false">Icons336\wait.png</BackgroundImageURI>
           <Title>PogodynkaWP8._0ver1</Title>
-          <BackContent>
-          </BackContent>
-          <BackBackgroundImageURI>
-          </BackBackgroundImageURI>
-          <BackTitle>
-          </BackTitle>
+          <BackContent></BackContent>
+          <BackBackgroundImageURI></BackBackgroundImageURI>
+          <BackTitle></BackTitle>
           <LargeBackgroundImageURI IsRelative="true" IsResource="false">Icons336\wait.png</LargeBackgroundImageURI>
           <LargeBackContent />
-          <LargeBackBackgroundImageURI IsRelative="true" IsResource="false">
-          </LargeBackBackgroundImageURI>
-          <DeviceLockImageURI>
-          </DeviceLockImageURI>
+          <LargeBackBackgroundImageURI IsRelative="true" IsResource="false"></LargeBackBackgroundImageURI>
+          <DeviceLockImageURI></DeviceLockImageURI>
           <HasLarge>True</HasLarge>
         </TemplateFlip>
       </PrimaryToken>

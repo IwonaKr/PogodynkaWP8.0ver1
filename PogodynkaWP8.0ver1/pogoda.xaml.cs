@@ -43,7 +43,7 @@ namespace PogodynkaWP8._0ver1
         public double temperaturaOdczuwalna; //do przechowywania obliczonej w funkcji temperatury odczuwalnej
         public string pog = "";
         public string wiatr = "";
-        public string wiatrPorywy="";
+        public string wiatrPorywy = "";
         public int godzina = 0;
         public int miesiac = 0;
         public string dzienTygodnia = "";
@@ -157,7 +157,7 @@ namespace PogodynkaWP8._0ver1
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
                     //ukrycie paska postępu
-                    this.postep.Visibility=Visibility.Collapsed;
+                    this.postep.Visibility = Visibility.Collapsed;
                     ///Wyświetlanie listy sportów i aktywności
 
                     this.sportyLB.ItemsSource = listaSportow;
@@ -179,7 +179,7 @@ namespace PogodynkaWP8._0ver1
                     this.textBox1.Text = informacja;
                     this.ikonka.Source = null;
 
-                    
+
                 });
                 Debug.WriteLine(nrex.Message);
             }
@@ -433,22 +433,22 @@ namespace PogodynkaWP8._0ver1
             double tempWC = 0.0, V = 0.0;
             double result = 0.0;
             //if (double.TryParse(temp, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out tempWC))
-            if(true)
+            if (true)
             {
-                tempWC=Convert.ToDouble(temp);
+                tempWC = Convert.ToDouble(temp);
                 Debug.WriteLine(tempWC.ToString());
 
                 if (double.TryParse(wiatr, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo, out V))
                 {
                     Debug.WriteLine(V.ToString());
-                    if (V!=0.0)
+                    if (V != 0.0)
                     {
                         V = Math.Pow(V, 0.16);
                         result = 13.12 + (0.6215 * tempWC) - (11.37 * V) + (0.3965 * tempWC * V);
                     }
                     else
                     {
-                        result=tempWC;
+                        result = tempWC;
                     }
                 }
             }
@@ -616,7 +616,7 @@ namespace PogodynkaWP8._0ver1
                     //wiatr = hf.windKph;
                     if (pog.Equals(" "))
                         pog = hf.condition;
-                    Debug.WriteLine("*"+pog+"*");
+                    Debug.WriteLine("*" + pog + "*");
                     i++;
                 }
                 godzinowaPrognoza.Add(hf);
@@ -705,12 +705,12 @@ namespace PogodynkaWP8._0ver1
                 else
                 {
                     cos += " porywy do " + current_obs.Element("wind_gust_kph").Value + "km/h  ";
-                    wiatrPorywy =current_obs.Element("wind_gust_kph").Value;
+                    wiatrPorywy = current_obs.Element("wind_gust_kph").Value;
                 }
                 FlipTileData.Title = this.miasto;
                 FlipTileData.BackTitle = this.miasto;
                 FlipTileData.Count = 0;
-                FlipTileData.BackContent = pog+"\nTemperatura: \n"+curObs.highTempC + "C/" + curObs.lowTempC + "C\n";
+                FlipTileData.BackContent = pog + "\nTemperatura: \n" + curObs.highTempC + "C/" + curObs.lowTempC + "C\n";
                 FlipTileData.WideBackContent = cos;
                 var tmpWiatr = current_obs.Element("wind_dir").Value;
                 Debug.WriteLine(tmpWiatr);
@@ -750,9 +750,9 @@ namespace PogodynkaWP8._0ver1
                     Debug.WriteLine("sunrise: " + astronomy.sunrise.Hour + " " + astronomy.sunset.Hour);
                     uri = new Uri("Icons/nt_" + curObs.icon + ".png", UriKind.Relative);
                     uri2 = new Uri("Icons336/nt_" + curObs.icon + ".png", UriKind.Relative);
-                    
-                    FlipTileData.BackBackgroundImage = uri2;
-                    FlipTileData.WideBackBackgroundImage = uri2;
+
+                    //FlipTileData.BackBackgroundImage = uri2;
+                    //FlipTileData.WideBackBackgroundImage = uri2;
                     FlipTileData.BackgroundImage = uri2;
                     FlipTileData.WideBackgroundImage = uri2;
                     FlipTileData.SmallBackgroundImage = uri2;
@@ -762,8 +762,8 @@ namespace PogodynkaWP8._0ver1
                     uri = new Uri("Icons/" + curObs.icon + ".png", UriKind.Relative);
                     uri2 = new Uri("Icons336/" + curObs.icon + ".png", UriKind.Relative);
 
-                    FlipTileData.BackBackgroundImage = uri2;
-                    FlipTileData.WideBackBackgroundImage = uri2;
+                    //FlipTileData.BackBackgroundImage = uri2;
+                    //FlipTileData.WideBackBackgroundImage = uri2;
                     FlipTileData.BackgroundImage = uri2;
                     FlipTileData.WideBackgroundImage = uri2;
                     FlipTileData.SmallBackgroundImage = uri2;
@@ -772,7 +772,7 @@ namespace PogodynkaWP8._0ver1
                 this.ikonka.Source = imgSource;
                 Debug.WriteLine(FlipTileData.Title.ToString());
                 ShellTile primaryTile = ShellTile.ActiveTiles.First();
-                
+
                 primaryTile.Update(FlipTileData);
 
             });
@@ -979,40 +979,73 @@ namespace PogodynkaWP8._0ver1
                             ImageSource imgSrc;
                             b.Tytul = d.title;
                             var strings = d.fcttextMetric.Split('.', ':');
+                           
                             int i = strings.Length;
                             switch (i)
                             {
                                 case 6:
                                     b.Warunki = strings[0];
-                                    b.TempMin = strings[3];
-                                    b.TempMax = strings[3];
+                                    b.TempMin = strings[3].Replace(" ", string.Empty);
+                                    b.TempMax = strings[3].Replace(" ", string.Empty);
                                     b.Wiatr = strings[5];
+                                    b.PrawdOpadow = "";
+                                    b.IloscOpadow = "";
+                                    break;
+                                case 7:
+                                    b.Warunki = strings[0];
+                                    b.TempMin = strings[3].Replace(" ", string.Empty);
+                                    b.TempMax = strings[3].Replace(" ", string.Empty);
+                                    b.Wiatr = (strings[4].Split(' '))[2] + strings[5];
+                                    b.PrawdOpadow = "";
+                                    b.IloscOpadow = "";
+                                    break;
+                                case 8:
+                                    b.Warunki = strings[0];
+                                    b.TempMin = strings[3].Replace(" ", string.Empty);
+                                    b.TempMax = strings[3].Replace(" ", string.Empty);
+                                    if (strings[4].Contains("iatr"))
+                                        b.Wiatr = (strings[4].Split(' '))[2] + strings[5];
+                                    else
+                                        b.Wiatr = strings[5];
                                     b.PrawdOpadow = "";
                                     b.IloscOpadow = "";
                                     break;
                                 case 9:
                                     b.Warunki = strings[0];
-                                    b.TempMax = strings[3];
-                                    b.TempMin = strings[3];
-                                    b.Wiatr = strings[5];
+                                    b.TempMax = strings[3].Replace(" ", string.Empty);
+                                    b.TempMin = strings[3].Replace(" ", string.Empty);
+                                    if (strings[4].Contains("iatr"))
+                                        b.Wiatr = (strings[4].Split(' '))[2];
+                                    else
+                                        b.Wiatr = strings[5] + strings[6];
                                     b.PrawdOpadow = "";
                                     b.IloscOpadow = "";
-                                    b.Wilgotnosc = strings[7];
+                                    //b.Wilgotnosc = strings[7];
+                                    break;
+                                case 10:
+                                    b.Warunki = strings[0];
+                                    b.TempMin = strings[3].Replace(" ", string.Empty);
+                                    b.TempMax = strings[3].Replace(" ", string.Empty);
+                                    b.Wiatr = (strings[4].Split(' '))[2] + strings[5];
+                                    b.PrawdOpadow = "";
+                                    b.IloscOpadow = "";
                                     break;
                                 case 11:
                                     b.Warunki = strings[0];
-                                    b.TempMax = strings[3];
-                                    b.TempMin = strings[3];
-                                    b.Wiatr = strings[5];
+                                    b.TempMax = strings[3].Replace(" ", string.Empty);
+                                    b.TempMin = strings[3].Replace(" ", string.Empty);
+                                    b.Wiatr = (strings[4].Split(' '))[2] + strings[5];
                                     b.PrawdOpadow = (strings[9].Split(' ')).Last();
                                     b.IloscOpadow = "";
-                                    b.Wilgotnosc = strings[7];
+                                    //b.Wilgotnosc = strings[7];
                                     break;
                                 default:
                                     b.Warunki = strings[0];
-                                    b.TempMax = strings[3];
-                                    b.Wiatr = strings[5];
-                                    b.PrawdOpadow = "";
+                                    b.TempMax = strings[3].Replace(" ", string.Empty);
+                                    b.Wiatr = (strings[4].Split(' '))[2] + strings[5];
+                                    if (strings.Length > 7)
+                                        b.PrawdOpadow = (strings[8].Split(' ')).Last();
+                                    else b.PrawdOpadow = "";
                                     b.IloscOpadow = "";
                                     b.Wilgotnosc = "";
                                     break;
@@ -1040,7 +1073,7 @@ namespace PogodynkaWP8._0ver1
                     Debug.WriteLine("dzien" + dzien.ToString());
                     TextBlock oDniu = this.oDniu;
                     oDniu.TextWrapping = TextWrapping.Wrap;
-                    oDniu.Text = "Dzisiaj jest " + dzien.data.day + " " + dzien.data.monthName + " " + dzien.data.year + ", " + dzien.data.weekDay + ". To " + (Int16.Parse(dzien.data.yday)+1).ToString() + " dzień roku.";
+                    oDniu.Text = "Dzisiaj jest " + dzien.data.day + " " + dzien.data.monthName + " " + dzien.data.year + ", " + dzien.data.weekDay + ". To " + (Int16.Parse(dzien.data.yday) + 1).ToString() + " dzień roku.";
                     oDniu.Visibility = Visibility.Visible;
                 });
             }
@@ -1099,7 +1132,7 @@ namespace PogodynkaWP8._0ver1
             {
                 ubrania.Add("buty_k.png");
                 ubrania.Add("spodniedl_k.png");
-                ubrania.Add("dlrekaw.png");
+                ubrania.Add("dlrekaw_k.png");
             }
             else if (temperaturaOdczuwalna < 28)
             {
